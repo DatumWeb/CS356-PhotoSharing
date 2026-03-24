@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 
 type SortOrder = 'desc' | 'asc'
@@ -330,6 +330,38 @@ function App() {
     () => (activeAlbumId ? (albums.find((a) => a.id === activeAlbumId) ?? null) : null),
     [albums, activeAlbumId],
   )
+
+  const lightboxPool = useMemo(() => {
+    if (screen === 'album-detail' && activeAlbum) {
+      return photos.filter((p) => activeAlbum.photoIds.includes(p.id))
+    }
+    return filteredPhotos
+  }, [screen, activeAlbum, photos, filteredPhotos])
+
+  const navigatePhoto = useCallback((direction: 1 | -1) => {
+    if (!activePhoto) return
+    const idx = lightboxPool.findIndex((p) => p.id === activePhoto.id)
+    if (idx === -1) return
+    const next = idx + direction
+    if (next < 0 || next >= lightboxPool.length) return
+    setLightboxMenuOpen(false)
+    setActivePhoto(lightboxPool[next])
+  }, [activePhoto, lightboxPool])
+
+  const activePhotoIndex = activePhoto ? lightboxPool.findIndex((p) => p.id === activePhoto.id) : -1
+  const hasPrev = activePhotoIndex > 0
+  const hasNext = activePhotoIndex >= 0 && activePhotoIndex < lightboxPool.length - 1
+
+  useEffect(() => {
+    if (!activePhoto) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') navigatePhoto(-1)
+      else if (e.key === 'ArrowRight') navigatePhoto(1)
+      else if (e.key === 'Escape') closePhoto()
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [activePhoto, navigatePhoto])
 
   const filteredAlbumsList = useMemo(() => {
     const query = albumListSearch.trim().toLowerCase()
@@ -935,10 +967,8 @@ function App() {
                     <img src={photo.url} alt={photo.title} loading="lazy" />
                     <div className="card-body">
                       <h3>"{photo.title}"</h3>
-                      <p>
-                        {new Date(photo.date).toLocaleString()} — {photo.owner}
-                      </p>
-                      <p>{photo.tags.slice(0, 3).join(' · ')}</p>
+                      <p className="card-owner">{photo.owner}</p>
+                      <p className="card-date">{new Date(photo.date).toLocaleDateString()}</p>
                     </div>
                   </button>
                 ))}
@@ -1312,125 +1342,143 @@ function App() {
 
       {activePhoto && (
         <div
-          className="overlay"
+          className="lightbox-overlay"
           role="dialog"
           aria-modal="true"
-          onClick={() => setLightboxMenuOpen(false)}
+          onClick={closePhoto}
         >
-          <article className="lightbox" onClick={(event) => event.stopPropagation()}>
-            <div className="lightbox-top">
-              <div className="lightbox-top-actions">
-                <div className="kebab-wrap">
+          {/* Close button */}
+          <button
+            type="button"
+            className="lb-close"
+            onClick={closePhoto}
+            aria-label="Close"
+          >
+            ×
+          </button>
+
+          {/* Counter */}
+          <div className="lb-counter">
+            {activePhotoIndex + 1} / {lightboxPool.length}
+          </div>
+
+          {/* Prev arrow */}
+          {hasPrev && (
+            <button
+              type="button"
+              className="lb-arrow lb-prev"
+              onClick={(e) => { e.stopPropagation(); navigatePhoto(-1) }}
+              aria-label="Previous photo"
+            >
+              ‹
+            </button>
+          )}
+
+          {/* Next arrow */}
+          {hasNext && (
+            <button
+              type="button"
+              className="lb-arrow lb-next"
+              onClick={(e) => { e.stopPropagation(); navigatePhoto(1) }}
+              aria-label="Next photo"
+            >
+              ›
+            </button>
+          )}
+
+          {/* Main content */}
+          <div className="lb-content" onClick={(e) => e.stopPropagation()}>
+            <img src={activePhoto.url} alt={activePhoto.title} className="lb-image" />
+
+            <div className="lb-info">
+              <div className="lb-info-main">
+                <h3 className="lb-title">"{activePhoto.title}"</h3>
+                <p className="lb-description">{activePhoto.description}</p>
+                <div className="lb-meta">
+                  <span className="lb-owner">{activePhoto.owner}</span>
+                  <span className="lb-date">{new Date(activePhoto.date).toLocaleDateString()}</span>
+                </div>
+              </div>
+
+              <div className="lb-tags">
+                {activePhoto.tags.map((tag) => (
+                  <span key={tag} className="tag-chip">
+                    {tag}
+                    <button
+                      type="button"
+                      className="tag-chip-remove"
+                      aria-label={`Remove tag ${tag}`}
+                      onClick={() => removeTagFromActivePhoto(tag)}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+
+              <div className="lb-toolbar">
+                <div className="lb-toolbar-left">
+                  <button type="button" className="btn-action" onClick={() => showToast('Added to album (mock).')}>
+                    Add to Album
+                  </button>
                   <button
                     type="button"
-                    className="kebab-btn"
-                    onClick={() => setLightboxMenuOpen((o) => !o)}
-                    aria-expanded={lightboxMenuOpen}
-                    aria-haspopup="menu"
-                    aria-label="Image options"
+                    className="btn-action"
+                    onClick={() => {
+                      setAddTagQuery('')
+                      setShowAddTagPopup(true)
+                    }}
                   >
-                    ⋮
+                    Add Tag
                   </button>
-                  {lightboxMenuOpen && (
-                    <ul className="kebab-menu" role="menu">
-                      <li role="none">
-                        <button type="button" role="menuitem" onClick={deleteActivePhoto}>
-                          Delete photo
-                        </button>
-                      </li>
-                      <li role="none">
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => {
-                            showToast('Download started (mock).')
-                            setLightboxMenuOpen(false)
-                          }}
-                        >
-                          Download photo
-                        </button>
-                      </li>
-                      <li role="none">
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => {
-                            showToast('Photo set as cover (mock).')
-                            setLightboxMenuOpen(false)
-                          }}
-                        >
-                          Set as album cover
-                        </button>
-                      </li>
-                      <li role="none">
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => {
-                            showToast('Photo reported (mock).')
-                            setLightboxMenuOpen(false)
-                          }}
-                        >
-                          Report photo
-                        </button>
-                      </li>
-                    </ul>
-                  )}
+                  <button type="button" className="btn-action" onClick={() => showToast('Share link generated (mock).')}>
+                    Share
+                  </button>
+                  <button type="button" className="btn-action" onClick={() => setShowComments(true)}>
+                    Comments
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  className="lightbox-close"
-                  onClick={closePhoto}
-                  aria-label="Close image view"
-                >
-                  ×
-                </button>
+                <div className="lb-toolbar-right">
+                  <div className="kebab-wrap">
+                    <button
+                      type="button"
+                      className="kebab-btn"
+                      onClick={() => setLightboxMenuOpen((o) => !o)}
+                      aria-expanded={lightboxMenuOpen}
+                      aria-haspopup="menu"
+                      aria-label="More options"
+                    >
+                      ⋮
+                    </button>
+                    {lightboxMenuOpen && (
+                      <ul className="kebab-menu" role="menu">
+                        <li role="none">
+                          <button type="button" role="menuitem" onClick={() => { showToast('Download started (mock).'); setLightboxMenuOpen(false) }}>
+                            Download photo
+                          </button>
+                        </li>
+                        <li role="none">
+                          <button type="button" role="menuitem" onClick={() => { showToast('Photo set as cover (mock).'); setLightboxMenuOpen(false) }}>
+                            Set as album cover
+                          </button>
+                        </li>
+                        <li role="none">
+                          <button type="button" role="menuitem" onClick={deleteActivePhoto}>
+                            Delete photo
+                          </button>
+                        </li>
+                        <li role="none">
+                          <button type="button" role="menuitem" onClick={() => { showToast('Photo reported (mock).'); setLightboxMenuOpen(false) }}>
+                            Report photo
+                          </button>
+                        </li>
+                      </ul>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-            <img src={activePhoto.url} alt={activePhoto.title} />
-            <h3>{activePhoto.title}</h3>
-            <p className="meta">
-              {activePhoto.owner} — {new Date(activePhoto.date).toLocaleString()}
-            </p>
-            <p className="meta">{activePhoto.description}</p>
-            <div className="tag-list">
-              {activePhoto.tags.map((tag) => (
-                <span key={tag} className="tag-chip">
-                  {tag}
-                  <button
-                    type="button"
-                    className="tag-chip-remove"
-                    aria-label={`Remove tag ${tag}`}
-                    onClick={() => removeTagFromActivePhoto(tag)}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-
-            <div className="action-row lightbox-actions">
-              <button type="button" className="btn-action" onClick={() => showToast('Added to album (mock).')}>
-                Add to Album
-              </button>
-              <button
-                type="button"
-                className="btn-action"
-                onClick={() => {
-                  setAddTagQuery('')
-                  setShowAddTagPopup(true)
-                }}
-              >
-                Add Tag
-              </button>
-              <button type="button" className="btn-action" onClick={() => showToast('Share link generated (mock).')}>
-                Share
-              </button>
-              <button type="button" className="btn-action" onClick={() => setShowComments(true)}>
-                Comments
-              </button>
-            </div>
-          </article>
+          </div>
         </div>
       )}
 

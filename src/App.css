@@ -544,7 +544,9 @@ textarea {
 }
 
 .photo-card .card-body {
-  padding: 0.3rem 0.15rem;
+  padding: 0.35rem 0.15rem 0.15rem;
+  display: grid;
+  gap: 0;
 }
 
 .photo-card .card-body h3 {
@@ -552,13 +554,20 @@ textarea {
   font-size: 0.82rem;
   font-weight: 500;
   color: #374151;
+  line-height: 1.3;
 }
 
-.photo-card .card-body p {
-  margin: 0.1rem 0 0;
-  font-size: 0.72rem;
-  color: #9ca3af;
-  line-height: 1.3;
+.photo-card .card-body .card-owner {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.photo-card .card-body .card-date {
+  margin: 0.05rem 0 0;
+  font-size: 0.7rem;
+  color: #b0b5be;
 }
 
 /* ── Album cards: stacked collection look ── */
@@ -649,7 +658,187 @@ textarea {
   z-index: 30;
 }
 
-.lightbox,
+/* ── Immersive lightbox ── */
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 20;
+}
+
+.lb-close {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 22;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.lb-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.lb-counter {
+  position: fixed;
+  top: 1.15rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 22;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.lb-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 22;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.lb-arrow:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.lb-prev { left: 1rem; }
+.lb-next { right: 1rem; }
+
+.lb-content {
+  max-width: min(800px, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lb-image {
+  max-width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.lb-info {
+  width: 100%;
+  max-width: 600px;
+  padding: 1rem 0 0;
+  color: #fff;
+}
+
+.lb-info-main {
+  margin-bottom: 0.65rem;
+}
+
+.lb-title {
+  margin: 0 0 0.3rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.lb-description {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.4;
+}
+
+.lb-meta {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+}
+
+.lb-owner {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.lb-date {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.lb-tags {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.lb-tags .tag-chip {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.lb-tags .tag-chip-remove {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.lb-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.lb-toolbar-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lb-toolbar .btn-action {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.15);
+  font-size: 0.82rem;
+}
+
+.lb-toolbar .btn-action:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.lb-toolbar .kebab-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+}
+
+.lb-toolbar .kebab-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .comment-modal,
 .add-tag-popup {
   width: min(760px, 100%);
@@ -700,24 +889,6 @@ textarea {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 0.75rem;
-}
-
-.lightbox img {
-  width: 100%;
-  border-radius: 10px;
-  max-height: 60vh;
-  object-fit: cover;
-}
-
-.lightbox-top {
-  margin-bottom: 0.6rem;
-}
-
-.lightbox-top-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 0.35rem;
 }
 
 .lightbox-close {
@@ -820,12 +991,6 @@ textarea {
 
 .comments-list {
   margin-bottom: 0.65rem;
-}
-
-.lightbox-actions {
-  border-top: 1px solid var(--border);
-  padding-top: 0.75rem;
-  margin-top: 0.25rem;
 }
 
 .btn-action {
