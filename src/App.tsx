@@ -831,7 +831,6 @@ function App() {
       <div className="layout">
         <aside className="sidebar" aria-label="Filters and tag search">
           <div className="filter-panel">
-            <h3 className="filter-heading">Filter Photos</h3>
             <div className="search-row">
               <input
                 className="search-input-full"
@@ -842,9 +841,8 @@ function App() {
               />
             </div>
 
-            <div className="controls-column">
-              <label>
-                Sort
+            <div className="filter-row">
+              <label className="filter-inline">
                 <select
                   value={sortOrder}
                   onChange={(event) => setSortOrder(event.target.value as SortOrder)}
@@ -853,18 +851,19 @@ function App() {
                   <option value="asc">Oldest first</option>
                 </select>
               </label>
+            </div>
 
-              <label>
-                Start date
+            <div className="date-row">
+              <label className="date-field">
+                From
                 <input
                   type="date"
                   value={startDate}
                   onChange={(event) => setStartDate(event.target.value)}
                 />
               </label>
-
-              <label>
-                End date
+              <label className="date-field">
+                To
                 <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
               </label>
             </div>
@@ -986,7 +985,6 @@ function App() {
         <div className="layout">
           <aside className="sidebar" aria-label="Album list filters">
             <div className="filter-panel">
-              <h3 className="filter-heading">Filter Albums</h3>
               <div className="search-row">
                 <input
                   className="search-input-full"
@@ -997,27 +995,29 @@ function App() {
                 />
               </div>
 
-              <div className="controls-column">
-                <label>
-                  Sort by latest photo
+              <div className="filter-row">
+                <label className="filter-inline">
                   <select
                     value={albumListSort}
                     onChange={(event) => setAlbumListSort(event.target.value as SortOrder)}
                   >
-                    <option value="desc">Newest activity first</option>
-                    <option value="asc">Oldest activity first</option>
+                    <option value="desc">Newest first</option>
+                    <option value="asc">Oldest first</option>
                   </select>
                 </label>
-                <label>
-                  Start date
+              </div>
+
+              <div className="date-row">
+                <label className="date-field">
+                  From
                   <input
                     type="date"
                     value={albumListStart}
                     onChange={(event) => setAlbumListStart(event.target.value)}
                   />
                 </label>
-                <label>
-                  End date
+                <label className="date-field">
+                  To
                   <input
                     type="date"
                     value={albumListEnd}
@@ -1172,7 +1172,6 @@ function App() {
               </div>
             </div>
             <div className="filter-panel">
-              <h3 className="filter-heading">Filter Album Photos</h3>
               <div className="search-row">
                 <input
                   className="search-input-full"
@@ -1183,9 +1182,8 @@ function App() {
                 />
               </div>
 
-              <div className="controls-column">
-                <label>
-                  Sort
+              <div className="filter-row">
+                <label className="filter-inline">
                   <select
                     value={detailPendingSort}
                     onChange={(event) => setDetailPendingSort(event.target.value as SortOrder)}
@@ -1194,16 +1192,19 @@ function App() {
                     <option value="asc">Oldest first</option>
                   </select>
                 </label>
-                <label>
-                  Start date
+              </div>
+
+              <div className="date-row">
+                <label className="date-field">
+                  From
                   <input
                     type="date"
                     value={detailPendingStart}
                     onChange={(event) => setDetailPendingStart(event.target.value)}
                   />
                 </label>
-                <label>
-                  End date
+                <label className="date-field">
+                  To
                   <input
                     type="date"
                     value={detailPendingEnd}
