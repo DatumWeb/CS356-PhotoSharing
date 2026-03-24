@@ -78,7 +78,7 @@ const initialPhotos: Photo[] = [
     owner: 'Allan Evans',
     album: 'Campus Day',
     tags: ['Graduation', 'Grad gear', 'Group photos', 'People laughing'],
-    url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
+    url: 'https://plus.unsplash.com/premium_photo-1713296255442-e9338f42aad8?q=80&w=1022&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     description: 'Group cap toss near the main quad.',
   },
   {
@@ -94,7 +94,7 @@ const initialPhotos: Photo[] = [
   },
   {
     id: 'w-002',
-    title: 'Cake cut cheers',
+    title: 'Engagement photo',
     event: 'Wedding',
     date: '2026-03-21T21:05:00',
     owner: 'Luke Hymas',
@@ -105,7 +105,7 @@ const initialPhotos: Photo[] = [
   },
   {
     id: 'f-002',
-    title: 'Backyard cousins game',
+    title: 'Backyard game',
     event: 'Family Reunion',
     date: '2026-03-18T16:40:00',
     owner: 'Allan Evans',
@@ -116,7 +116,7 @@ const initialPhotos: Photo[] = [
   },
   {
     id: 'g-002',
-    title: 'Mascot photo line',
+    title: 'Graduation group',
     event: 'Graduation',
     date: '2026-03-12T11:10:00',
     owner: 'Kevin Young',
