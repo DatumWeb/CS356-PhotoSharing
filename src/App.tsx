@@ -731,37 +731,62 @@ function App() {
     <div className="app">
       <header className="page-header page-header-bar">
         <div className="page-header-text">
-          <h1>PhotoSort</h1>
+          <p className="app-brand">PhotoSort</p>
+          <h1>
+            {screen === 'photos' && 'My Photos'}
+            {screen === 'albums' && 'My Albums'}
+            {screen === 'album-detail' && activeAlbum && activeAlbum.name}
+          </h1>
           <p>
             {screen === 'photos' &&
-              'Each active tag is its own section; photos appear under every tag they match.'}
-            {screen === 'albums' && 'Albums grouped by the same tag sections as your photos.'}
+              'Browse and filter your photos. Use tags to organize the feed into sections — each tag becomes its own group.'}
+            {screen === 'albums' && 'Your albums, organized by tags. Click an album to view or add photos.'}
             {screen === 'album-detail' && activeAlbum && (
               <>
-                Album: <strong>{activeAlbum.name}</strong> — {activeAlbum.isPublic ? 'Public link' : 'Private'}
-                {activeAlbum.collaborators ? ` · Collaborators: ${activeAlbum.collaborators}` : ''}
+                <span className="album-meta-badge">{activeAlbum.isPublic ? 'Public' : 'Private'}</span>
+                {activeAlbum.collaborators && (
+                  <> · Shared with {activeAlbum.collaborators}</>
+                )}
+                {' · '}
+                {activeAlbum.photoIds.length} {activeAlbum.photoIds.length === 1 ? 'photo' : 'photos'}
               </>
             )}
           </p>
         </div>
-        <nav className="header-nav" aria-label="Main navigation">
-          {screen !== 'photos' && (
-            <button type="button" className="btn-secondary" onClick={goToPhotos}>
-              Photos
+        <div className="header-actions">
+          <nav className="tab-selector" aria-label="Main navigation">
+            <button
+              type="button"
+              className={screen === 'photos' ? 'tab-btn tab-active' : 'tab-btn'}
+              onClick={goToPhotos}
+              aria-current={screen === 'photos' ? 'page' : undefined}
+            >
+              My Photos
             </button>
-          )}
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={goToAlbumsList}
-          >
+            <button
+              type="button"
+              className={screen === 'albums' || screen === 'album-detail' ? 'tab-btn tab-active' : 'tab-btn'}
+              onClick={goToAlbumsList}
+              aria-current={screen === 'albums' || screen === 'album-detail' ? 'page' : undefined}
+            >
+              My Albums
+            </button>
+          </nav>
+          <button type="button" className="btn-create" onClick={openCreateAlbumModal}>
+            + Create Album
+          </button>
+        </div>
+      </header>
+
+      {screen === 'album-detail' && activeAlbum && (
+        <nav className="breadcrumb" aria-label="Breadcrumb">
+          <button type="button" className="breadcrumb-link" onClick={goToAlbumsList}>
             My Albums
           </button>
-          <button type="button" onClick={openCreateAlbumModal}>
-            Create Album
-          </button>
+          <span className="breadcrumb-sep" aria-hidden="true">›</span>
+          <span className="breadcrumb-current" aria-current="page">{activeAlbum.name}</span>
         </nav>
-      </header>
+      )}
 
       {screen === 'photos' && (
       <div className="layout">
@@ -815,7 +840,7 @@ function App() {
               onClick={() => setShowActiveTagsPanel((v) => !v)}
               aria-expanded={showActiveTagsPanel}
             >
-              Active tags
+              {showActiveTagsPanel ? '▾ Active tags' : '▸ Active tags'}
             </button>
 
             {showActiveTagsPanel && (
@@ -895,7 +920,7 @@ function App() {
         <main className="main-column">
           {feedSections.map((section) => (
             <section key={section.key} className="event-section">
-              <h2>{section.title}</h2>
+              <h2>{section.title} <span className="section-count">{section.photos.length}</span></h2>
               <div className="photo-grid">
                 {section.photos.map((photo) => (
                   <button
@@ -915,7 +940,7 @@ function App() {
                   </button>
                 ))}
                 {section.photos.length === 0 && (
-                  <p className="empty-state">No photos match this view.</p>
+                  <p className="empty-state">No photos match your current filters. Try broadening your search or removing some tags.</p>
                 )}
               </div>
             </section>
@@ -938,8 +963,8 @@ function App() {
                   className="search-input-full"
                   value={albumListSearch}
                   onChange={(event) => setAlbumListSearch(event.target.value)}
-                  placeholder="Search titles, people, memories..."
-                  aria-label="Search photos"
+                  placeholder="Search album names, collaborators, tags..."
+                  aria-label="Search albums"
                 />
               </div>
 
@@ -978,7 +1003,7 @@ function App() {
                 onClick={() => setAlbumListShowActivePanel((v) => !v)}
                 aria-expanded={albumListShowActivePanel}
               >
-                Active tags
+                {albumListShowActivePanel ? '▾ Active tags' : '▸ Active tags'}
               </button>
 
               {albumListShowActivePanel && (
@@ -1061,7 +1086,7 @@ function App() {
           <main className="main-column">
             {albumListFeedSections.map((section) => (
               <section key={section.key} className="event-section">
-                <h2>{section.title}</h2>
+                <h2>{section.title} <span className="section-count">{section.albums.length}</span></h2>
                 <div className="photo-grid">
                   {section.albums.map((album) => {
                     const cover = photos.find((p) => album.photoIds.includes(p.id))
@@ -1086,7 +1111,7 @@ function App() {
                     )
                   })}
                   {section.albums.length === 0 && (
-                    <p className="empty-state">No albums match this view.</p>
+                    <p className="empty-state">No albums match your current filters. Try a different search or create a new album.</p>
                   )}
                 </div>
               </section>
@@ -1152,7 +1177,7 @@ function App() {
                 onClick={() => setDetailShowActivePanel((v) => !v)}
                 aria-expanded={detailShowActivePanel}
               >
-                Active tags
+                {detailShowActivePanel ? '▾ Active tags' : '▸ Active tags'}
               </button>
 
               {detailShowActivePanel && (
@@ -1214,14 +1239,13 @@ function App() {
               </button>
 
               <p className="panel-hint filter-pending-note">
-                Press <strong>Filter this album</strong> to apply search, dates, and section tags to the grid. Open{' '}
-                <strong>Search from saved photos</strong> to add images; that dialog has its own search while you
-                browse.
+                Filters are staged until you press <strong>Apply filters</strong>. Use{' '}
+                <strong>Search from saved photos</strong> above to add images to this album.
               </p>
 
               <div className="sidebar-action-stack">
-                <button type="button" className="btn-wide" onClick={applyAlbumDetailFilters}>
-                  Filter this album
+                <button type="button" className="btn-wide btn-primary" onClick={applyAlbumDetailFilters}>
+                  Apply filters
                 </button>
               </div>
 
@@ -1238,20 +1262,15 @@ function App() {
                   setShowDetailAllTagsModal(false)
                 }}
               >
-                Clear pending filters
+                Reset filters
               </button>
             </div>
           </aside>
 
           <main className="main-column">
-            <div className="album-detail-toolbar">
-              <button type="button" className="btn-secondary" onClick={goToAlbumsList}>
-                ← All albums
-              </button>
-            </div>
             {albumDetailFeedSections.map((section) => (
               <section key={section.key} className="event-section">
-                <h2>{section.title}</h2>
+                <h2>{section.title} <span className="section-count">{section.photos.length}</span></h2>
                 <div className="photo-grid">
                   {section.photos.map((photo) => (
                     <button
@@ -1271,7 +1290,7 @@ function App() {
                     </button>
                   ))}
                   {section.photos.length === 0 && (
-                    <p className="empty-state">No photos match this view.</p>
+                    <p className="empty-state">No photos match your current filters. Try broadening your search or removing some tags.</p>
                   )}
                 </div>
               </section>
@@ -1313,11 +1332,11 @@ function App() {
                           type="button"
                           role="menuitem"
                           onClick={() => {
-                            showToast('Other option 2 (placeholder).')
+                            showToast('Download started (mock).')
                             setLightboxMenuOpen(false)
                           }}
                         >
-                          Other option 2
+                          Download photo
                         </button>
                       </li>
                       <li role="none">
@@ -1325,11 +1344,11 @@ function App() {
                           type="button"
                           role="menuitem"
                           onClick={() => {
-                            showToast('Other option 3 (placeholder).')
+                            showToast('Photo set as cover (mock).')
                             setLightboxMenuOpen(false)
                           }}
                         >
-                          Other option 3
+                          Set as album cover
                         </button>
                       </li>
                       <li role="none">
@@ -1337,11 +1356,11 @@ function App() {
                           type="button"
                           role="menuitem"
                           onClick={() => {
-                            showToast('Other option 4 (placeholder).')
+                            showToast('Photo reported (mock).')
                             setLightboxMenuOpen(false)
                           }}
                         >
-                          Other option 4
+                          Report photo
                         </button>
                       </li>
                     </ul>
@@ -1379,24 +1398,25 @@ function App() {
               ))}
             </div>
 
-            <div className="action-row">
-              <button type="button" onClick={() => showToast('Added to album (mock).')}>
-                + Album
+            <div className="action-row lightbox-actions">
+              <button type="button" className="btn-action" onClick={() => showToast('Added to album (mock).')}>
+                Add to Album
               </button>
               <button
                 type="button"
+                className="btn-action"
                 onClick={() => {
                   setAddTagQuery('')
                   setShowAddTagPopup(true)
                 }}
               >
-                + Tag
+                Add Tag
               </button>
-              <button type="button" onClick={() => showToast('Share link generated (mock).')}>
+              <button type="button" className="btn-action" onClick={() => showToast('Share link generated (mock).')}>
                 Share
               </button>
-              <button type="button" onClick={() => setShowComments(true)}>
-                Comment
+              <button type="button" className="btn-action" onClick={() => setShowComments(true)}>
+                Comments
               </button>
             </div>
           </article>
@@ -1773,7 +1793,7 @@ function App() {
                     onClick={() => setShowActiveTagsPanel((v) => !v)}
                     aria-expanded={showActiveTagsPanel}
                   >
-                    Active tags
+                    {showActiveTagsPanel ? '▾ Active tags' : '▸ Active tags'}
                   </button>
 
                   {showActiveTagsPanel && (
@@ -1863,7 +1883,7 @@ function App() {
               <main className="main-column">
                 {savedPickerFeedSections.map((section) => (
                   <section key={section.key} className="event-section">
-                    <h2>{section.title}</h2>
+                    <h2>{section.title} <span className="section-count">{section.photos.length}</span></h2>
                     <div className="photo-grid">
                       {section.photos.map((photo) => (
                         <button
@@ -1880,7 +1900,7 @@ function App() {
                         </button>
                       ))}
                       {section.photos.length === 0 && (
-                        <p className="empty-state">No photos match this view.</p>
+                        <p className="empty-state">No photos match your current filters. Try broadening your search or removing some tags.</p>
                       )}
                     </div>
                   </section>
