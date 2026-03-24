@@ -1,0 +1,29 @@
+:root {
+  --border: #d1d5db;
+  --panel-bg: #f9fafb;
+  font-family: Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.35;
+  color: #111827;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f3f4f6;
+}
+
+#root {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 1.2rem;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}

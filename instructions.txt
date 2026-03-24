@@ -1,0 +1,145 @@
+Tech stack info:
+Use typescript and react
+
+hosted in github pages
+
+What the page is
+
+A collaberative image sharing and storing site
+
+Take a look at this- 
+Group Members: Luke Hymas, Allan Evans, Kevin Young
+Cards Used:
+Wedding
+Graduation
+Family Reunion
+Wedding cake
+Bride
+Groom
+Bride and Groom
+Well wishes
+Leaving the reception
+Partying
+Dancing
+Laughter
+Decorations
+Tables
+Venue
+People eating
+
+
+Diploma
+Grad gear
+Photo with mascot
+Photo with dean
+Photo with spouse
+Photo with brother/sister
+Photo 
+Games
+Group photos
+Candid photos
+People laughing
+People crying
+Brothers and sisters
+Cousins
+Grandparents
+The whole family
+Activities
+Funny/goofy pictures
+Stories
+
+
+
+
+
+General
+
+Family photos
+Negative comments
+Positive comments
+Short stories
+Memories
+Identity
+Share button
+View what a specific person shared
+View what everyone shared
+Event timeline
+Share with other sites
+View what you posted 
+
+
+
+
+
+
+Interview Notes: 
+
+Fay
+
+She had a hard time placing venue, share button, and short stories and stories so she split them to balance it. In the end she had three groups, one group was people, one grouping was things/objects. The last group was actions/activities
+
+
+
+
+Lyle
+
+Started out with 4 groups pretty quicky, because those didn’t seem related enough. Wasn’t sure what to do with Negative comments. Was even more confused about “identity”. Wasn’t sure what to do with “well wishes”. In the end he had 4 groups even though he had 5 and 6 while he was organizing. The four groups were cards that could describe what is the picture or the subject, 2 was ways to share. 3 was interactions with phots and last was types or shared entities.
+
+
+
+Sabrine
+Mentioned how “positive comments” feels like social media. Starting to form a “doing” groupiong kinda like Fays action grouping. The groupings of subjects was broken into topics like wedding stuff, family stuff. grad.  General stuff like group or goofy. Kept all the ones that ended with “photos”, kept the family ones that didn’t describe photos necessarily. Final groupings, wedding, doing, social media, photos, family/people. Things to be doing but aren’t doing, grad.\
+
+
+Isabelle:
+
+Started putting the wedding cards together. Started to putting all the gerunds together. Started to orginize them kinda like Sabrine with the topics. Asked if she could have a title for each grouping. She was noticing that she was putting a lot of the cards that say people by each other. 9 groups. I feel like there was overlap but
+Wedding, people and their identity, photos and pictures, events and decor, comments/reactions and emotions, specific activities, “people” doing something, graduation, connections
+
+ 
+Colton:
+He did it pretty rapid fire honestly. Was confused on the identity card after he put it in with the family looking grouping. He moved it to the. He finished really fast so hard to take notes during lol.
+Wedding planning, wedding goodbyes thought it should be same things, things you do. Things people do, emotions and activities. Graduation, PHOTOS social media, family and activities said he would call it interation. After going through his groupings he realized some of them could probably be combined and I think that was due to the speed he did it at.
+
+
+Paige:
+Started with the wedding group like other people, and there was starting to be a family group. Started to put a lot of view and share stuff together, kinda ways that you interact with a photo. Noted how a lot or the cards are similar (which I suppose makes sense because she grouped them together). 
+Final groupings, weddings. Family. Memories. College. Social media.
+
+
+What surprised us:
+They had a lot more subgroups then I would have thought.
+This included sub groupings like wedding and graduation which makes sense
+People often sorted the social media aspects with other things at first but then created a group for it
+Users didn’t like how some of the cards felt like they could be in multiple categories or some cards were completely alone
+Despite how they got there most users ended with very similar themes: like Events People Actions Photos, Socials 
+
+How we will use this in our website design:
+Since people had a lot of sub groups we will have a way to group the photos into sub groups and have that be a natural part of the flow. Like filters 
+Maybe something like Browse photos by events, people, moments etc
+Have events be the default for consistency 
+Everything social will not have its own page, just toasts and small buttons
+Since some photos can overlap allows tags for photos so they can show up in multiple groupings 
+--
+
+for some context on how we want the information orginized.
+
+Use Unsplash api to generate some images (we don't need too many just enogh to make the tags work)
+
+This site does NOT need to be functional in the sense of actually being able to log in, share, comment, just make everything have toast pop up that acts like  it works*
+
+Site is called PhotoSort
+
+we are going to orginize the site like you already logged in and have a couple albums, some shared and some private, but also just have lots of images stored that aren't in an album but are tagged
+
+the opening page/ index is going to be "Events"
+ and will chonologically sort top down by photos that are tagged with event
+ at the top have a search help bar that allows you to further filter tags, switch from chronological decending to acending, maybe time box it or whatever else you think is good
+
+When you click on an image you should have like an image toast/overlay pop up, kinda like make it zoom in to it, have there be an x at the top of that pop up to exit out of the view and 3 dots by that for other things you can do with the image like delete it.
+- it will have the image, under will have a plus icon button (to add it to an album), a tag icon button that allows you to remove or add tags, a share button that allows you to send the photo to someone, a comment button that opens up another pop up that shows the comments on that image and allow for you to comment. (Let me know if I missed one) 
+
+
+ok lets start with that and use informaiton from the card sort notes to help aid the desgin.
+
+also add a consise readme to explain how the infomation architecture is set up, as well as how to locally run it and the site url for where it will be in github pages.
