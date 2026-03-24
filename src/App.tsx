@@ -934,7 +934,7 @@ function App() {
                   >
                     <img src={photo.url} alt={photo.title} loading="lazy" />
                     <div className="card-body">
-                      <h3>{photo.title}</h3>
+                      <h3>"{photo.title}"</h3>
                       <p>
                         {new Date(photo.date).toLocaleString()} — {photo.owner}
                       </p>
@@ -1292,7 +1292,7 @@ function App() {
                     >
                       <img src={photo.url} alt={photo.title} loading="lazy" />
                       <div className="card-body">
-                        <h3>{photo.title}</h3>
+                        <h3>"{photo.title}"</h3>
                         <p>
                           {new Date(photo.date).toLocaleString()} — {photo.owner}
                         </p>
@@ -1905,7 +1905,7 @@ function App() {
                         >
                           <img src={photo.url} alt={photo.title} loading="lazy" />
                           <div className="card-body">
-                            <h3>{photo.title}</h3>
+                            <h3>"{photo.title}"</h3>
                             <p>{photo.tags.slice(0, 3).join(' · ')}</p>
                           </div>
                         </button>
