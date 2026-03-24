@@ -17,15 +17,20 @@
 }
 
 .page-header-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   gap: 1rem;
 }
 
+@media (max-width: 900px) {
+  .page-header-bar {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+}
+
 .page-header-text {
-  flex: 1 1 240px;
   min-width: 0;
 }
 
@@ -40,6 +45,7 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
+  justify-content: flex-end;
 }
 
 .tab-selector {
@@ -217,10 +223,11 @@
   color: #1e1b4b;
 }
 
-.album-card .album-cover {
+.album-cover {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
+  display: block;
 }
 
 .create-album-modal {
@@ -288,6 +295,37 @@
   background: var(--panel-bg);
   display: grid;
   gap: 0.85rem;
+}
+
+.filter-heading {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7280;
+}
+
+.album-add-toolbar {
+  padding: 0.75rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  background: #eef2ff;
+  margin-bottom: 0.65rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.toolbar-label {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.album-add-buttons {
+  display: grid;
+  gap: 0.4rem;
 }
 
 .search-row,
@@ -474,33 +512,112 @@ textarea {
 
 .photo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+  padding-right: 0.5rem;
 }
+
+/* ── Photo cards: gallery thumbnails ── */
 
 .photo-card {
   display: grid;
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border: none;
+  border-radius: 6px;
   overflow: hidden;
   padding: 0;
   text-align: left;
   cursor: pointer;
+  background: transparent;
+  transition: opacity 0.12s ease;
 }
 
 .photo-card:hover {
-  border-color: #9ca3af;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  opacity: 0.85;
 }
 
 .photo-card img {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
+  border-radius: 6px;
 }
 
-.card-body {
-  padding: 0.55rem 0.7rem;
+.photo-card .card-body {
+  padding: 0.3rem 0.15rem;
+}
+
+.photo-card .card-body h3 {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.photo-card .card-body p {
+  margin: 0.1rem 0 0;
+  font-size: 0.72rem;
+  color: #9ca3af;
+  line-height: 1.3;
+}
+
+/* ── Album cards: stacked collection look ── */
+
+.album-card {
+  display: grid;
+  position: relative;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  background: #fff;
+  box-shadow:
+    4px 4px 0 -2px #fff,
+    4px 4px 0 0 var(--border),
+    8px 8px 0 -2px #fff,
+    8px 8px 0 0 var(--border);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.album-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    4px 4px 0 -2px #fff,
+    4px 4px 0 0 #9ca3af,
+    8px 8px 0 -2px #fff,
+    8px 8px 0 0 #9ca3af;
+}
+
+.album-cover-wrap {
+  position: relative;
+}
+
+.album-cover-empty {
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  color: #9ca3af;
+  font-size: 0.88rem;
+}
+
+.album-count-badge {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+.album-card .card-body {
+  padding: 0.6rem 0.75rem;
 }
 
 .card-body h3 {

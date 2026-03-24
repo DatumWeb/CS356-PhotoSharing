@@ -61,69 +61,69 @@ const seedTags = [
 const initialPhotos: Photo[] = [
   {
     id: 'w-001',
-    title: 'First dance glow',
+    title: 'Under the veil',
     event: 'Wedding',
     date: '2026-03-21T20:15:00',
     owner: 'Luke Hymas',
     album: 'Wedding Highlights',
     tags: ['Wedding', 'Bride', 'Groom', 'Dancing', 'Laughter'],
     url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
-    description: 'The first dance right after sunset.',
+    description: 'Sneaking a quiet moment together before the reception.',
   },
   {
     id: 'g-001',
-    title: 'Cap toss',
+    title: 'Caps in the air',
     event: 'Graduation',
     date: '2026-03-12T14:30:00',
     owner: 'Allan Evans',
     album: 'Campus Day',
     tags: ['Graduation', 'Grad gear', 'Group photos', 'People laughing'],
     url: 'https://plus.unsplash.com/premium_photo-1713296255442-e9338f42aad8?q=80&w=1022&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    description: 'Group cap toss near the main quad.',
+    description: 'The whole crew tossing caps after the ceremony.',
   },
   {
     id: 'f-001',
-    title: 'Sunday table story time',
+    title: 'Sunset on the beach',
     event: 'Family Reunion',
     date: '2026-03-18T12:05:00',
     owner: 'Kevin Young',
     album: null,
     tags: ['Family Reunion', 'Grandparents', 'Stories', 'Memories', 'Family photos'],
     url: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1200&q=80',
-    description: 'Grandparents sharing old stories over lunch.',
+    description: 'Everyone together for golden hour on the last night.',
   },
   {
     id: 'w-002',
-    title: 'Engagement photo',
+    title: 'Golden hour newlyweds',
     event: 'Wedding',
     date: '2026-03-21T21:05:00',
     owner: 'Luke Hymas',
     album: 'Wedding Highlights',
     tags: ['Wedding', 'Wedding cake', 'Well wishes', 'People laughing'],
     url: 'https://images.unsplash.com/photo-1460978812857-470ed1c77af0?auto=format&fit=crop&w=1200&q=80',
-    description: 'Cake cut and cheers from family and friends.',
+    description: 'Walking together right as the sun dipped behind the trees.',
   },
   {
     id: 'f-002',
-    title: 'Backyard game',
+    title: 'Crafts with the cousins',
     event: 'Family Reunion',
     date: '2026-03-18T16:40:00',
     owner: 'Allan Evans',
     album: 'Family Moments',
     tags: ['Family Reunion', 'Candid photos', 'The whole family', 'Partying'],
     url: 'https://images.unsplash.com/photo-1485546784815-e380f3297414?auto=format&fit=crop&w=1200&q=80',
-    description: 'Casual game before dinner with the whole family.',
+    description: 'Painting ornaments at the craft table after lunch.',
   },
   {
     id: 'g-002',
-    title: 'Graduation group',
+    title: 'Ready to walk',
     event: 'Graduation',
     date: '2026-03-12T11:10:00',
     owner: 'Kevin Young',
     album: null,
     tags: ['Graduation', 'Photo with mascot', 'Group photos', 'Memories'],
     url: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80',
-    description: 'A quick photo line with the mascot before ceremony.',
+    description: 'One last look back before walking across the stage.',
   },
 ]
 
@@ -753,28 +753,35 @@ function App() {
             )}
           </p>
         </div>
-        <div className="header-actions">
-          <nav className="tab-selector" aria-label="Main navigation">
-            <button
-              type="button"
-              className={screen === 'photos' ? 'tab-btn tab-active' : 'tab-btn'}
-              onClick={goToPhotos}
-              aria-current={screen === 'photos' ? 'page' : undefined}
-            >
-              My Photos
-            </button>
-            <button
-              type="button"
-              className={screen === 'albums' || screen === 'album-detail' ? 'tab-btn tab-active' : 'tab-btn'}
-              onClick={goToAlbumsList}
-              aria-current={screen === 'albums' || screen === 'album-detail' ? 'page' : undefined}
-            >
-              My Albums
-            </button>
-          </nav>
-          <button type="button" className="btn-create" onClick={openCreateAlbumModal}>
-            + Create Album
+        <nav className="tab-selector" aria-label="Main navigation">
+          <button
+            type="button"
+            className={screen === 'photos' ? 'tab-btn tab-active' : 'tab-btn'}
+            onClick={goToPhotos}
+            aria-current={screen === 'photos' ? 'page' : undefined}
+          >
+            My Photos
           </button>
+          <button
+            type="button"
+            className={screen === 'albums' || screen === 'album-detail' ? 'tab-btn tab-active' : 'tab-btn'}
+            onClick={goToAlbumsList}
+            aria-current={screen === 'albums' || screen === 'album-detail' ? 'page' : undefined}
+          >
+            My Albums
+          </button>
+        </nav>
+        <div className="header-actions">
+          {screen === 'photos' && (
+            <button type="button" className="btn-create" onClick={triggerFakeUploadFromDevice}>
+              + Upload Photo
+            </button>
+          )}
+          {screen === 'albums' && (
+            <button type="button" className="btn-create" onClick={openCreateAlbumModal}>
+              + Create Album
+            </button>
+          )}
         </div>
       </header>
 
@@ -791,12 +798,8 @@ function App() {
       {screen === 'photos' && (
       <div className="layout">
         <aside className="sidebar" aria-label="Filters and tag search">
-          <div className="upload-toolbar" role="group" aria-label="Upload">
-            <button type="button" className="btn-wide upload-toolbar-btn" onClick={triggerFakeUploadFromDevice}>
-              Upload from device
-            </button>
-          </div>
           <div className="filter-panel">
+            <h3 className="filter-heading">Filter Photos</h3>
             <div className="search-row">
               <input
                 className="search-input-full"
@@ -952,12 +955,8 @@ function App() {
       {screen === 'albums' && (
         <div className="layout">
           <aside className="sidebar" aria-label="Album list filters">
-            <div className="upload-toolbar" role="group" aria-label="Upload">
-              <button type="button" className="btn-wide upload-toolbar-btn" onClick={triggerFakeUploadFromDevice}>
-                Upload from device
-              </button>
-            </div>
             <div className="filter-panel">
+              <h3 className="filter-heading">Filter Albums</h3>
               <div className="search-row">
                 <input
                   className="search-input-full"
@@ -1094,16 +1093,24 @@ function App() {
                       <button
                         key={album.id}
                         type="button"
-                        className="photo-card album-card"
+                        className="album-card"
                         onClick={() => openAlbumDetailPage(album.id)}
                       >
-                        {cover && (
-                          <img src={cover.url} alt="" loading="lazy" className="album-cover" />
-                        )}
+                        <div className="album-cover-wrap">
+                          {cover ? (
+                            <img src={cover.url} alt="" loading="lazy" className="album-cover" />
+                          ) : (
+                            <div className="album-cover-empty">No photos yet</div>
+                          )}
+                          <span className="album-count-badge">
+                            {album.photoIds.length} {album.photoIds.length === 1 ? 'photo' : 'photos'}
+                          </span>
+                        </div>
                         <div className="card-body">
                           <h3>{album.name}</h3>
                           <p>
-                            {album.isPublic ? 'Public' : 'Private'} · {album.photoIds.length} photos
+                            <span className="album-meta-badge">{album.isPublic ? 'Public' : 'Private'}</span>
+                            {album.collaborators && <> · {album.collaborators}</>}
                           </p>
                           <p>{album.tags.slice(0, 4).join(' · ')}</p>
                         </div>
@@ -1123,15 +1130,19 @@ function App() {
       {screen === 'album-detail' && activeAlbum && (
         <div className="layout">
           <aside className="sidebar" aria-label="Album filters (apply with button)">
-            <div className="upload-toolbar upload-toolbar-split" role="group" aria-label="Add to album">
-              <button type="button" className="upload-toolbar-btn" onClick={triggerFakeUploadFromDevice}>
-                Upload from device
-              </button>
-              <button type="button" className="upload-toolbar-btn" onClick={openSavedPhotosPicker}>
-                Search from saved photos
-              </button>
+            <div className="album-add-toolbar">
+              <p className="toolbar-label">Add photos to this album</p>
+              <div className="album-add-buttons">
+                <button type="button" className="btn-create btn-wide" onClick={triggerFakeUploadFromDevice}>
+                  + Upload New Photo
+                </button>
+                <button type="button" className="btn-secondary btn-wide" onClick={openSavedPhotosPicker}>
+                  Add from My Photos
+                </button>
+              </div>
             </div>
             <div className="filter-panel">
+              <h3 className="filter-heading">Filter Album Photos</h3>
               <div className="search-row">
                 <input
                   className="search-input-full"
