@@ -230,6 +230,10 @@
   display: block;
 }
 
+.header-description {  
+  max-width: 300px;
+}
+
 .create-album-modal {
   width: min(480px, 100%);
   max-height: 92vh;

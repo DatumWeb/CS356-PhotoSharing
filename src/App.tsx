@@ -769,7 +769,8 @@ function App() {
             {screen === 'albums' && 'My Albums'}
             {screen === 'album-detail' && activeAlbum && activeAlbum.name}
           </h1>
-          <p>
+          <div className="header-description">
+            <p>
             {screen === 'photos' &&
               'Browse and filter your photos. Use tags to organize the feed into sections — each tag becomes its own group.'}
             {screen === 'albums' && 'Your albums, organized by tags. Click an album to view or add photos.'}
@@ -784,6 +785,8 @@ function App() {
               </>
             )}
           </p>
+          </div>
+          
         </div>
         <nav className="tab-selector" aria-label="Main navigation">
           <button
