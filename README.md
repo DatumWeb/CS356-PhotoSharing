@@ -22,8 +22,13 @@ npm run dev
 
 Open the app at `http://localhost:5173`.
 
-## GitHub Pages URL
+## GitHub Pages
 
-Configured for deployment at:
+**Live site:** https://datumweb.github.io/CS356-PhotoSharing/
 
-`https://datumweb.github.io/CS356-PhotoSharing/`
+**One-time setup (repo admin):**
+
+1. **Settings** → **Pages** → **Build and deployment** → **Source:** **GitHub Actions** (not “Deploy from a branch”).
+2. Push to `main` or open **Actions** → **Deploy to GitHub Pages** → **Run workflow**.
+
+The workflow (`.github/workflows/deploy-pages.yml`) runs `npm ci` and `npm run build`, then publishes the `dist/` folder. The Vite `base` path is `/CS356-PhotoSharing/` in production builds only.

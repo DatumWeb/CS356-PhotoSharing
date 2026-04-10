@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
-export default defineConfig({
+// Production base must match the repo name for GitHub Pages project sites:
+// https://<owner>.github.io/CS356-PhotoSharing/
+// https://vite.dev/config/shared-options.html#base
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  base: '/CS356-PhotoSharing/',
-})
+  base: mode === 'production' ? '/CS356-PhotoSharing/' : '/',
+}))
