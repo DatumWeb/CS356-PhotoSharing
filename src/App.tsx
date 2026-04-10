@@ -428,12 +428,50 @@ function CardOwnerFilter({ owner, onActivate }: CardOwnerFilterProps) {
       }}
     >
       <span className="card-owner-line">
+        <span className="card-owner-arrow" aria-hidden="true">
+          ›
+        </span>
         <span className="card-owner-prefix" aria-hidden="true">
           View all by{' '}
         </span>
         <span className="card-owner-name">{owner}</span>
       </span>
     </span>
+  )
+}
+
+function EmptyStateBlock({
+  title,
+  detail,
+  onReset,
+  resetLabel = 'Reset filters',
+}: {
+  title: string
+  detail: string
+  onReset?: () => void
+  resetLabel?: string
+}) {
+  return (
+    <div className="empty-state-card" role="status">
+      <div className="empty-state-icon" aria-hidden="true">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+      <p className="empty-state-title">{title}</p>
+      <p className="empty-state-detail">{detail}</p>
+      {onReset && (
+        <button type="button" className="btn-secondary empty-state-action" onClick={onReset}>
+          {resetLabel}
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -601,6 +639,7 @@ function App() {
   const [showActiveTagsPanel, setShowActiveTagsPanel] = useState(false)
   const [activeTagPickerQuery, setActiveTagPickerQuery] = useState('')
   const [lightboxMenuOpen, setLightboxMenuOpen] = useState(false)
+  const [showDeletePhotoDialog, setShowDeletePhotoDialog] = useState(false)
   const [showAddTagPopup, setShowAddTagPopup] = useState(false)
   const [addTagQuery, setAddTagQuery] = useState('')
   const [showAllTagsModal, setShowAllTagsModal] = useState(false)
@@ -659,13 +698,15 @@ function App() {
 
   const openPhoto = (photo: Photo) => {
     setLightboxMenuOpen(false)
+    setShowDeletePhotoDialog(false)
     setActivePhoto(photo)
   }
 
-  const closePhoto = () => {
+  const closePhoto = useCallback(() => {
     setLightboxMenuOpen(false)
+    setShowDeletePhotoDialog(false)
     setActivePhoto(null)
-  }
+  }, [])
 
   const showToast = (message: string) => {
     const id = ++toastIdRef.current
@@ -745,17 +786,6 @@ function App() {
   const activePhotoIndex = activePhoto ? lightboxPool.findIndex((p) => p.id === activePhoto.id) : -1
   const hasPrev = activePhotoIndex > 0
   const hasNext = activePhotoIndex >= 0 && activePhotoIndex < lightboxPool.length - 1
-
-  useEffect(() => {
-    if (!activePhoto) return
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') navigatePhoto(-1)
-      else if (e.key === 'ArrowRight') navigatePhoto(1)
-      else if (e.key === 'Escape') closePhoto()
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [activePhoto, navigatePhoto])
 
   useEffect(() => {
     return () => {
@@ -928,9 +958,9 @@ function App() {
     setShowAddToAlbumModal(true)
   }
 
-  const closeSavedPhotosPicker = () => {
+  const closeSavedPhotosPicker = useCallback(() => {
     setShowAddToAlbumModal(false)
-  }
+  }, [])
 
   const openCreateAlbumModal = () => {
     setCreateAlbumName('')
@@ -1012,6 +1042,122 @@ function App() {
     setUploadDragActive(false)
     if (uploadFileInputRef.current) uploadFileInputRef.current.value = ''
   }, [uploadPickUrl])
+
+  const blockingLightboxKeys =
+    showAddTagPopup ||
+    showAllTagsModal ||
+    showUploadModal ||
+    showCreateAlbumModal ||
+    showAlbumListAllTagsModal ||
+    showDetailAllTagsModal ||
+    showAddToAlbumModal ||
+    showComments ||
+    showDeletePhotoDialog
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showDeletePhotoDialog) {
+          setShowDeletePhotoDialog(false)
+          return
+        }
+        if (showAddTagPopup) {
+          setShowAddTagPopup(false)
+          return
+        }
+        if (showAllTagsModal) {
+          setShowAllTagsModal(false)
+          return
+        }
+        if (showUploadModal) {
+          closeUploadModal()
+          return
+        }
+        if (showCreateAlbumModal) {
+          setShowCreateAlbumModal(false)
+          return
+        }
+        if (showAlbumListAllTagsModal) {
+          setShowAlbumListAllTagsModal(false)
+          return
+        }
+        if (showDetailAllTagsModal) {
+          setShowDetailAllTagsModal(false)
+          return
+        }
+        if (showAddToAlbumModal) {
+          closeSavedPhotosPicker()
+          return
+        }
+        if (showComments) {
+          setShowComments(false)
+          return
+        }
+        if (activePhoto) {
+          closePhoto()
+        }
+        return
+      }
+      if (
+        activePhoto &&
+        !blockingLightboxKeys &&
+        (e.key === 'ArrowLeft' || e.key === 'ArrowRight')
+      ) {
+        e.preventDefault()
+        if (e.key === 'ArrowLeft') navigatePhoto(-1)
+        else navigatePhoto(1)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [
+    activePhoto,
+    navigatePhoto,
+    blockingLightboxKeys,
+    closePhoto,
+    closeSavedPhotosPicker,
+    closeUploadModal,
+    showAddTagPopup,
+    showAddToAlbumModal,
+    showAlbumListAllTagsModal,
+    showAllTagsModal,
+    showComments,
+    showCreateAlbumModal,
+    showDeletePhotoDialog,
+    showDetailAllTagsModal,
+    showUploadModal,
+  ])
+
+  useEffect(() => {
+    const scrollLocked =
+      Boolean(activePhoto) ||
+      showAddTagPopup ||
+      showAllTagsModal ||
+      showUploadModal ||
+      showCreateAlbumModal ||
+      showAlbumListAllTagsModal ||
+      showDetailAllTagsModal ||
+      showAddToAlbumModal ||
+      showComments ||
+      showDeletePhotoDialog
+    if (!scrollLocked) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [
+    activePhoto,
+    showAddTagPopup,
+    showAddToAlbumModal,
+    showAlbumListAllTagsModal,
+    showAllTagsModal,
+    showComments,
+    showCreateAlbumModal,
+    showDeletePhotoDialog,
+    showDetailAllTagsModal,
+    showUploadModal,
+  ])
 
   const openUploadModal = () => {
     clearUploadProgressTimer()
@@ -1315,11 +1461,44 @@ function App() {
     setShowAddTagPopup(false)
   }
 
-  const deleteActivePhoto = () => {
+  const confirmDeleteActivePhoto = () => {
     if (!activePhoto) return
-    setPhotos((prev) => prev.filter((photo) => photo.id !== activePhoto.id))
-    showToast(`"${activePhoto.title}" deleted.`)
+    const id = activePhoto.id
+    const title = activePhoto.title
+    setPhotos((prev) => prev.filter((photo) => photo.id !== id))
+    showToast(`"${title}" removed from the library.`)
+    setShowDeletePhotoDialog(false)
     closePhoto()
+  }
+
+  const resetPhotosFilters = () => {
+    setSelectedTags([])
+    setSearchQuery('')
+    setSortOrder('desc')
+    setStartDate('')
+    setEndDate('')
+    setShowActiveTagsPanel(false)
+    setShowAllTagsModal(false)
+  }
+
+  const resetAlbumListFilters = () => {
+    setAlbumListSelectedTags([])
+    setAlbumListSearch('')
+    setAlbumListSort('desc')
+    setAlbumListStart('')
+    setAlbumListEnd('')
+    setAlbumListShowActivePanel(false)
+    setShowAlbumListAllTagsModal(false)
+  }
+
+  const resetDetailFilters = () => {
+    setDetailPendingSearch('')
+    setDetailPendingSort('desc')
+    setDetailPendingStart('')
+    setDetailPendingEnd('')
+    setDetailPendingSectionTags([])
+    setDetailShowActivePanel(false)
+    setShowDetailAllTagsModal(false)
   }
 
   return (
@@ -1459,19 +1638,7 @@ function App() {
       <div className="layout">
         <aside className="sidebar" aria-label="Filters and tag search">
           <div className="filter-panel">
-            <button
-              type="button"
-              className="btn-reset filter-reset-top"
-              onClick={() => {
-                setSelectedTags([])
-                setSearchQuery('')
-                setSortOrder('desc')
-                setStartDate('')
-                setEndDate('')
-                setShowActiveTagsPanel(false)
-                setShowAllTagsModal(false)
-              }}
-            >
+            <button type="button" className="btn-reset filter-reset-top" onClick={resetPhotosFilters}>
               Reset filters
             </button>
 
@@ -1601,7 +1768,11 @@ function App() {
                   </button>
                 ))}
                 {section.photos.length === 0 && (
-                  <p className="empty-state">No photos match your current filters. Try broadening your search or removing some tags.</p>
+                  <EmptyStateBlock
+                    title="Nothing in this section"
+                    detail="Loosen dates, remove a tag, or shorten the search — then try again."
+                    onReset={resetPhotosFilters}
+                  />
                 )}
               </div>
             </section>
@@ -1777,7 +1948,11 @@ function App() {
                     )
                   })}
                   {section.albums.length === 0 && (
-                    <p className="empty-state">No albums match your current filters. Try a different search or create a new album.</p>
+                    <EmptyStateBlock
+                      title="No albums in this view"
+                      detail="Relax the filters or search for a different album name."
+                      onReset={resetAlbumListFilters}
+                    />
                   )}
                 </div>
               </section>
@@ -1961,7 +2136,11 @@ function App() {
                     </button>
                   ))}
                   {section.photos.length === 0 && (
-                    <p className="empty-state">No photos match your current filters. Try broadening your search or removing some tags.</p>
+                    <EmptyStateBlock
+                      title="Nothing here yet"
+                      detail="Clear staged filters or widen dates — or add photos from the library above."
+                      onReset={resetDetailFilters}
+                    />
                   )}
                 </div>
               </section>
@@ -2093,7 +2272,14 @@ function App() {
                           </button>
                         </li>
                         <li role="none">
-                          <button type="button" role="menuitem" onClick={deleteActivePhoto}>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setLightboxMenuOpen(false)
+                              setShowDeletePhotoDialog(true)
+                            }}
+                          >
                             Delete photo
                           </button>
                         </li>
@@ -2109,6 +2295,31 @@ function App() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {showDeletePhotoDialog && activePhoto && (
+        <div
+          className="overlay overlay-narrow"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowDeletePhotoDialog(false)}
+        >
+          <article className="delete-confirm-card" onClick={(event) => event.stopPropagation()}>
+            <h3 className="delete-confirm-title">Remove this photo?</h3>
+            <p className="delete-confirm-lead">
+              <strong>“{activePhoto.title}”</strong> will disappear from your library in this demo. Nothing is sent to a
+              server.
+            </p>
+            <div className="delete-confirm-actions">
+              <button type="button" className="btn-secondary" onClick={() => setShowDeletePhotoDialog(false)}>
+                Cancel
+              </button>
+              <button type="button" className="btn-danger-solid" onClick={confirmDeleteActivePhoto}>
+                Delete
+              </button>
+            </div>
+          </article>
         </div>
       )}
 
@@ -2837,7 +3048,11 @@ function App() {
                         </button>
                       ))}
                       {section.photos.length === 0 && (
-                        <p className="empty-state">No photos match your current filters. Try broadening your search or removing some tags.</p>
+                        <EmptyStateBlock
+                          title="Nothing to pick from"
+                          detail="Soften the filters to see more photos from the library."
+                          onReset={resetPhotosFilters}
+                        />
                       )}
                     </div>
                   </section>

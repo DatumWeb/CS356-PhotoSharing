@@ -1,9 +1,37 @@
 :root {
-  --border: #d1d5db;
-  --panel-bg: #f9fafb;
-  font-family: Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  line-height: 1.35;
-  color: #111827;
+  /* ── Palette: Editorial Darkroom ── */
+  --ink: #1c1917;
+  --ink-secondary: #44403c;
+  --ink-muted: #78716c;
+  --ink-faint: #a8a29e;
+  --canvas: #faf8f5;
+  --canvas-raised: #fff;
+  --canvas-sunken: #f5f0eb;
+  --border: #e7e0d8;
+  --border-strong: #d6cdc3;
+  --accent: #c2410c;
+  --accent-hover: #9a3412;
+  --accent-subtle: #fff7ed;
+  --accent-muted: #fed7aa;
+  --panel-bg: #f5f0eb;
+  --surface-warm: #fefcf9;
+  --overlay: rgba(28, 25, 23, 0.72);
+  --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.06);
+  --shadow-md: 0 4px 12px rgba(28, 25, 23, 0.08);
+  --shadow-lg: 0 20px 40px rgba(28, 25, 23, 0.12);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* ── Typography ── */
+  --font-display: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+
+  font-family: var(--font-body);
+  line-height: 1.5;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
@@ -12,18 +40,50 @@
 
 body {
   margin: 0;
-  background: #f3f4f6;
+  background: var(--canvas);
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px;
 }
 
 #root {
-  width: min(1200px, 100%);
+  width: min(1260px, 100%);
   margin: 0 auto;
-  padding: 1.2rem;
+  padding: 1.5rem 2rem;
 }
 
-h1,
-h2,
-h3,
+@media (max-width: 640px) {
+  #root {
+    padding: 1rem;
+  }
+}
+
+h1, h2, h3 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: 1.75rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+  color: var(--ink);
+}
+
+h3 {
+  font-size: 1.05rem;
+}
+
 p {
   margin-top: 0;
+}
+
+::selection {
+  background: var(--accent-muted);
+  color: var(--ink);
 }
