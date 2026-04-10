@@ -1,8 +1,24 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+} from 'react'
+import avatarPhotoUrl from './assets/scottlarsen.jpeg'
 import './App.css'
 
 type SortOrder = 'desc' | 'asc'
-type EventType = 'Wedding' | 'Graduation' | 'Family Reunion'
+type EventType =
+  | 'Graduation'
+  | 'Family Reunion'
+  | 'Office'
+  | 'Team Offsite'
+  | 'Conference'
+  | 'Product'
+  | 'Misc'
 
 type Photo = {
   id: string
@@ -33,14 +49,8 @@ type Album = {
 type AppScreen = 'photos' | 'albums' | 'album-detail'
 
 const seedTags = [
-  'Wedding',
   'Graduation',
   'Family Reunion',
-  'Bride',
-  'Groom',
-  'Wedding cake',
-  'Well wishes',
-  'Decorations',
   'Partying',
   'Dancing',
   'Laughter',
@@ -56,20 +66,33 @@ const seedTags = [
   'Memories',
   'Stories',
   'Family photos',
+  'Office',
+  'Desk',
+  'Coffee',
+  'Laptop',
+  'Meeting',
+  'Whiteboard',
+  'Presentation',
+  'Chicago',
+  'Airport',
+  'Travel',
+  'Food',
+  'Breakfast',
+  'Team building',
+  'Branding',
+  'City',
+  'Nature',
+  'Beach',
+  'Hiking',
+  'Misc',
+  'Sneakers',
+  'Workspace',
+  'Rooftop',
+  'Happy hour',
+  'Water',
 ]
 
 const initialPhotos: Photo[] = [
-  {
-    id: 'w-001',
-    title: 'Under the veil',
-    event: 'Wedding',
-    date: '2026-03-21T20:15:00',
-    owner: 'Luke Hymas',
-    album: 'Wedding Highlights',
-    tags: ['Wedding', 'Bride', 'Groom', 'Dancing', 'Laughter'],
-    url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
-    description: 'Sneaking a quiet moment together before the reception.',
-  },
   {
     id: 'g-001',
     title: 'Caps in the air',
@@ -87,21 +110,10 @@ const initialPhotos: Photo[] = [
     event: 'Family Reunion',
     date: '2026-03-18T12:05:00',
     owner: 'Kevin Young',
-    album: null,
+    album: 'Family Moments',
     tags: ['Family Reunion', 'Grandparents', 'Stories', 'Memories', 'Family photos'],
     url: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1200&q=80',
     description: 'Everyone together for golden hour on the last night.',
-  },
-  {
-    id: 'w-002',
-    title: 'Golden hour newlyweds',
-    event: 'Wedding',
-    date: '2026-03-21T21:05:00',
-    owner: 'Luke Hymas',
-    album: 'Wedding Highlights',
-    tags: ['Wedding', 'Wedding cake', 'Well wishes', 'People laughing'],
-    url: 'https://images.unsplash.com/photo-1460978812857-470ed1c77af0?auto=format&fit=crop&w=1200&q=80',
-    description: 'Walking together right as the sun dipped behind the trees.',
   },
   {
     id: 'f-002',
@@ -125,7 +137,305 @@ const initialPhotos: Photo[] = [
     url: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80',
     description: 'One last look back before walking across the stage.',
   },
+  {
+    id: 'o-001',
+    title: 'Espresso machine guilt',
+    event: 'Office',
+    date: '2026-02-03T08:40:00',
+    owner: 'Jamie Rivera',
+    album: 'Q4 Kickoff',
+    tags: ['Office', 'Coffee', 'Breakfast', 'Desk'],
+    url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1200&q=80',
+    description: 'Someone finally cleaned the drip tray. It lasted almost a full day.',
+  },
+  {
+    id: 'o-002',
+    title: 'Slides that could have been an email',
+    event: 'Office',
+    date: '2026-02-03T10:15:00',
+    owner: 'Dr. Scott',
+    album: 'Q4 Kickoff',
+    tags: ['Office', 'Meeting', 'Presentation', 'Whiteboard'],
+    url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80',
+    description: 'Forty-seven minutes of alignment. The snacks were good though.',
+  },
+  {
+    id: 'o-003',
+    title: 'Parking-lot sunrise',
+    event: 'Office',
+    date: '2026-02-04T07:55:00',
+    owner: 'Morgan Lee',
+    album: 'Q4 Kickoff',
+    tags: ['Office', 'City', 'Travel', 'Misc'],
+    url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1200&q=80',
+    description: 'Got here before the badge readers woke up.',
+  },
+  {
+    id: 'o-004',
+    title: 'Cable management (aspirational)',
+    event: 'Office',
+    date: '2026-01-18T16:20:00',
+    owner: 'Alex Chen',
+    album: 'Office Life',
+    tags: ['Office', 'Desk', 'Laptop', 'Workspace'],
+    url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80',
+    description: 'Two monitors, one dream, zero spare HDMI adapters.',
+  },
+  {
+    id: 'o-005',
+    title: 'Stand-up that ran long',
+    event: 'Office',
+    date: '2026-01-22T09:45:00',
+    owner: 'Priya Patel',
+    album: 'Office Life',
+    tags: ['Office', 'Meeting', 'Whiteboard', 'Team building'],
+    url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80',
+    description: 'We blamed the new project management tool. Again.',
+  },
+  {
+    id: 'o-006',
+    title: 'Plant custody rotation',
+    event: 'Office',
+    date: '2026-01-29T13:10:00',
+    owner: 'Sam Torres',
+    album: 'Office Life',
+    tags: ['Office', 'Desk', 'Misc', 'Nature'],
+    url: 'https://images.unsplash.com/photo-1463320898484-cdee8141c787?auto=format&fit=crop&w=1200&q=80',
+    description: 'If this fern dies on my watch I am changing teams.',
+  },
+  {
+    id: 't-001',
+    title: 'Ferry deck wind',
+    event: 'Team Offsite',
+    date: '2025-09-14T11:30:00',
+    owner: 'Kevin Young',
+    album: 'Seattle Trip',
+    tags: ['Team building', 'Travel', 'Nature', 'Water'],
+    url: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=1200&q=80',
+    description: 'Nobody brought a jacket. Everyone pretended they meant to.',
+  },
+  {
+    id: 't-002',
+    title: 'Pike Place chaos',
+    event: 'Team Offsite',
+    date: '2025-09-14T15:05:00',
+    owner: 'Allan Evans',
+    album: 'Seattle Trip',
+    tags: ['Team building', 'Food', 'Travel', 'City'],
+    url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+    description: 'Fish flew. Cameras came out. HR said we could keep this one.',
+  },
+  {
+    id: 't-003',
+    title: 'Airport floor breakfast',
+    event: 'Team Offsite',
+    date: '2025-09-13T06:40:00',
+    owner: 'Luke Hymas',
+    album: 'Seattle Trip',
+    tags: ['Airport', 'Breakfast', 'Travel', 'Misc'],
+    url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80',
+    description: 'The only acceptable use of a $14 airport croissant.',
+  },
+  {
+    id: 't-004',
+    title: 'Escape room: we did not escape',
+    event: 'Team Offsite',
+    date: '2025-11-02T19:10:00',
+    owner: 'Jamie Rivera',
+    album: 'Rooftop & Hangs',
+    tags: ['Team building', 'Happy hour', 'City', 'Misc'],
+    url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80',
+    description: 'We blamed the intern. The intern blamed the hint system.',
+  },
+  {
+    id: 't-005',
+    title: 'Rooftop golden hour',
+    event: 'Team Offsite',
+    date: '2025-11-02T20:45:00',
+    owner: 'Dr. Scott',
+    album: 'Rooftop & Hangs',
+    tags: ['Rooftop', 'Happy hour', 'City', 'Team building'],
+    url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80',
+    description: 'Someone suggested karaoke. We ordered more fries instead.',
+  },
+  {
+    id: 'm-001',
+    title: 'Dog in a hoodie (not ours)',
+    event: 'Misc',
+    date: '2025-12-01T14:22:00',
+    owner: 'Morgan Lee',
+    album: null,
+    tags: ['Misc', 'Candid photos', 'People laughing'],
+    url: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1200&q=80',
+    description: 'Met at the crosswalk. Named him Budget. Never saw him again.',
+  },
+  {
+    id: 'm-002',
+    title: 'Highway rest stop clouds',
+    event: 'Misc',
+    date: '2025-08-19T17:50:00',
+    owner: 'Alex Chen',
+    album: null,
+    tags: ['Travel', 'Nature', 'Memories'],
+    url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1200&q=80',
+    description: 'GPS said scenic route. GPS was feeling dramatic.',
+  },
+  {
+    id: 'm-003',
+    title: 'Farmers market tomatoes',
+    event: 'Misc',
+    date: '2026-01-11T10:15:00',
+    owner: 'Priya Patel',
+    album: 'Snack Wall',
+    tags: ['Food', 'Breakfast', 'Misc'],
+    url: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1200&q=80',
+    description: 'We bought six. Ate two in the parking lot.',
+  },
+  {
+    id: 'm-004',
+    title: 'Donut wall aftermath',
+    event: 'Misc',
+    date: '2026-01-11T11:40:00',
+    owner: 'Sam Torres',
+    album: 'Snack Wall',
+    tags: ['Food', 'Partying', 'Office'],
+    url: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=80',
+    description: 'Marketing promised restraint. Marketing was optimistic.',
+  },
+  {
+    id: 'm-005',
+    title: 'Hiking trail mud tax',
+    event: 'Misc',
+    date: '2025-10-05T09:30:00',
+    owner: 'Luke Hymas',
+    album: null,
+    tags: ['Hiking', 'Nature', 'Group photos'],
+    url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&q=80',
+    description: 'The group chat still argues about who suggested “easy loop.”',
+  },
+  {
+    id: 'm-006',
+    title: 'Beach umbrella geometry',
+    event: 'Misc',
+    date: '2025-07-22T16:00:00',
+    owner: 'Allan Evans',
+    album: null,
+    tags: ['Beach', 'Travel', 'Memories'],
+    url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    description: 'Sand in the laptop bag. Worth it, allegedly.',
+  },
+  {
+    id: 'm-007',
+    title: 'Conference badge collection',
+    event: 'Conference',
+    date: '2025-11-18T08:10:00',
+    owner: 'Dr. Scott',
+    album: null,
+    tags: ['Conference', 'Travel', 'Chicago', 'Presentation'],
+    url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80',
+    description: 'Twelve lanyards, one personality.',
+  },
+  {
+    id: 'm-008',
+    title: 'Airport moving walkway sprint',
+    event: 'Misc',
+    date: '2025-11-18T18:55:00',
+    owner: 'Kevin Young',
+    album: null,
+    tags: ['Airport', 'Travel', 'Misc'],
+    url: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1200&q=80',
+    description: 'We still missed the connection. Spirit intact, bags less so.',
+  },
+  {
+    id: 'p-001',
+    title: 'Sneaker drop flat lay',
+    event: 'Product',
+    date: '2026-01-08T13:00:00',
+    owner: 'Jamie Rivera',
+    album: 'Product Drops',
+    tags: ['Product', 'Sneakers', 'Branding'],
+    url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80',
+    description: 'Creative said “more energy.” We rotated the left shoe 4°.',
+  },
+  {
+    id: 'p-002',
+    title: 'Headphones hero shot',
+    event: 'Product',
+    date: '2026-01-08T13:45:00',
+    owner: 'Morgan Lee',
+    album: 'Product Drops',
+    tags: ['Product', 'Branding', 'Desk'],
+    url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80',
+    description: 'Reflections edited until Legal stopped answering Slack.',
+  },
+  {
+    id: 'c-001',
+    title: 'Keynote crowd blur',
+    event: 'Conference',
+    date: '2025-10-28T10:00:00',
+    owner: 'Dr. Scott',
+    album: 'Chicago 2025',
+    tags: ['Conference', 'Chicago', 'Presentation', 'Meeting'],
+    url: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1200&q=80',
+    description: 'Stage lights, free tote bags, mild existential dread.',
+  },
+  {
+    id: 'c-002',
+    title: 'Expo hall carpet fatigue',
+    event: 'Conference',
+    date: '2025-10-28T14:30:00',
+    owner: 'Luke Hymas',
+    album: 'Chicago 2025',
+    tags: ['Conference', 'Chicago', 'Team building'],
+    url: 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&w=1200&q=80',
+    description: 'We collected seventeen stickers and one questionable stress ball.',
+  },
 ]
+
+/** Demo-only: organization and user shown in the shell (no real auth). */
+const DEMO_ORG_NAME = 'Acme Inc'
+const APP_DISPLAY_NAME = 'PhotoTag'
+const DEMO_USER_DISPLAY_NAME = 'Dr. Scott'
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+type CardOwnerFilterProps = {
+  owner: string
+  onActivate: (owner: string) => void
+}
+
+function CardOwnerFilter({ owner, onActivate }: CardOwnerFilterProps) {
+  return (
+    <span
+      className="card-owner-wrap"
+      role="button"
+      tabIndex={0}
+      aria-label={`View all photos by ${owner}`}
+      onClick={(event) => {
+        event.stopPropagation()
+        onActivate(owner)
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          event.stopPropagation()
+          onActivate(owner)
+        }
+      }}
+    >
+      <span className="card-owner-line">
+        <span className="card-owner-prefix" aria-hidden="true">
+          View all by{' '}
+        </span>
+        <span className="card-owner-name">{owner}</span>
+      </span>
+    </span>
+  )
+}
 
 function photoHasTag(photo: Photo, tag: string) {
   return photo.tags.includes(tag) || photo.event === tag
@@ -171,7 +481,7 @@ function filterPhotosBySearchAndDates(
 
 function buildPhotoFeedSections(photos: Photo[], selectedTags: string[]) {
   if (selectedTags.length === 0) {
-    return [{ key: 'all', title: 'All photos', photos }]
+    return [{ key: 'all', title: `All ${DEMO_ORG_NAME} photos`, photos }]
   }
   return selectedTags.map((tag) => ({
     key: tag,
@@ -182,7 +492,7 @@ function buildPhotoFeedSections(photos: Photo[], selectedTags: string[]) {
 
 function buildAlbumFeedSections(albums: Album[], selectedTags: string[]) {
   if (selectedTags.length === 0) {
-    return [{ key: 'all', title: 'All albums', albums }]
+    return [{ key: 'all', title: `All ${DEMO_ORG_NAME} albums`, albums }]
   }
   return selectedTags.map((tag) => ({
     key: tag,
@@ -192,14 +502,6 @@ function buildAlbumFeedSections(albums: Album[], selectedTags: string[]) {
 }
 
 const initialAlbums: Album[] = [
-  {
-    id: 'album-wedding',
-    name: 'Wedding Highlights',
-    isPublic: false,
-    collaborators: 'Luke Hymas, Allan Evans',
-    tags: ['Wedding', 'Bride'],
-    photoIds: ['w-001', 'w-002'],
-  },
   {
     id: 'album-campus',
     name: 'Campus Day',
@@ -214,7 +516,63 @@ const initialAlbums: Album[] = [
     isPublic: false,
     collaborators: 'Allan Evans',
     tags: ['Family Reunion', 'Candid photos'],
-    photoIds: ['f-002'],
+    photoIds: ['f-001', 'f-002'],
+  },
+  {
+    id: 'album-kickoff',
+    name: 'Q4 Kickoff',
+    isPublic: false,
+    collaborators: 'Dr. Scott, Jamie Rivera, Morgan Lee',
+    tags: ['Office', 'Meeting'],
+    photoIds: ['o-001', 'o-002', 'o-003'],
+  },
+  {
+    id: 'album-office-life',
+    name: 'Office Life',
+    isPublic: true,
+    collaborators: 'Priya Patel, Sam Torres, Alex Chen',
+    tags: ['Office', 'Desk'],
+    photoIds: ['o-004', 'o-005', 'o-006'],
+  },
+  {
+    id: 'album-seattle',
+    name: 'Seattle Trip',
+    isPublic: true,
+    collaborators: 'Kevin Young, Allan Evans, Luke Hymas',
+    tags: ['Travel', 'Team building'],
+    photoIds: ['t-001', 't-002', 't-003'],
+  },
+  {
+    id: 'album-rooftop',
+    name: 'Rooftop & Hangs',
+    isPublic: false,
+    collaborators: 'Jamie Rivera, Dr. Scott',
+    tags: ['Rooftop', 'Happy hour'],
+    photoIds: ['t-004', 't-005'],
+  },
+  {
+    id: 'album-snacks',
+    name: 'Snack Wall',
+    isPublic: true,
+    collaborators: 'Sam Torres, Priya Patel',
+    tags: ['Food', 'Office'],
+    photoIds: ['m-003', 'm-004'],
+  },
+  {
+    id: 'album-product',
+    name: 'Product Drops',
+    isPublic: true,
+    collaborators: 'Jamie Rivera, Morgan Lee',
+    tags: ['Product', 'Branding'],
+    photoIds: ['p-001', 'p-002'],
+  },
+  {
+    id: 'album-chicago',
+    name: 'Chicago 2025',
+    isPublic: true,
+    collaborators: 'Dr. Scott, Luke Hymas',
+    tags: ['Conference', 'Chicago'],
+    photoIds: ['c-001', 'c-002'],
   },
 ]
 
@@ -223,6 +581,12 @@ function App() {
   const [albums, setAlbums] = useState<Album[]>(initialAlbums)
   const [activeAlbumId, setActiveAlbumId] = useState<string | null>(null)
   const nextAlbumIdRef = useRef(100)
+  const nextUploadPhotoIdRef = useRef(9000)
+  const uploadFileInputRef = useRef<HTMLInputElement>(null)
+  const uploadProgressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const photosSearchInputRef = useRef<HTMLInputElement>(null)
+  const detailSearchInputRef = useRef<HTMLInputElement>(null)
+  const savedPickerSearchInputRef = useRef<HTMLInputElement>(null)
 
   const [photos, setPhotos] = useState<Photo[]>(initialPhotos)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -279,6 +643,15 @@ function App() {
   const [detailTagsModalSearch, setDetailTagsModalSearch] = useState('')
   const [showAddToAlbumModal, setShowAddToAlbumModal] = useState(false)
 
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [uploadPickUrl, setUploadPickUrl] = useState<string | null>(null)
+  const [uploadTitle, setUploadTitle] = useState('')
+  const [uploadDescription, setUploadDescription] = useState('')
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadInFlight, setUploadInFlight] = useState(false)
+  const [uploadFileMeta, setUploadFileMeta] = useState<{ name: string; size: number } | null>(null)
+  const [uploadDragActive, setUploadDragActive] = useState(false)
+
   const knownTags = useMemo(
     () => mergeUniqueTags([seedTags, ...photos.map((p) => p.tags)]),
     [photos],
@@ -300,6 +673,27 @@ function App() {
     window.setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id))
     }, 2800)
+  }
+
+  const applyUploaderFilter = (owner: string) => {
+    if (showAddToAlbumModal) {
+      setSearchQuery(owner)
+      showToast(`Search set to “${owner}”.`)
+      window.requestAnimationFrame(() => savedPickerSearchInputRef.current?.focus())
+      return
+    }
+    if (screen === 'photos') {
+      setSearchQuery(owner)
+      showToast(`Search set to “${owner}”.`)
+      window.requestAnimationFrame(() => photosSearchInputRef.current?.focus())
+      return
+    }
+    if (screen === 'album-detail') {
+      setDetailPendingSearch(owner)
+      setDetailAppliedSearch(owner)
+      showToast(`Searching this album for “${owner}”.`)
+      window.requestAnimationFrame(() => detailSearchInputRef.current?.focus())
+    }
   }
 
   const addFilterTagIfExists = (tag: string) => {
@@ -362,6 +756,15 @@ function App() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [activePhoto, navigatePhoto])
+
+  useEffect(() => {
+    return () => {
+      if (uploadProgressTimerRef.current) {
+        clearInterval(uploadProgressTimerRef.current)
+        uploadProgressTimerRef.current = null
+      }
+    }
+  }, [])
 
   const filteredAlbumsList = useMemo(() => {
     const query = albumListSearch.trim().toLowerCase()
@@ -587,8 +990,168 @@ function App() {
     closeSavedPhotosPicker()
   }
 
+  const clearUploadProgressTimer = () => {
+    if (uploadProgressTimerRef.current) {
+      clearInterval(uploadProgressTimerRef.current)
+      uploadProgressTimerRef.current = null
+    }
+  }
+
+  const closeUploadModal = useCallback(() => {
+    clearUploadProgressTimer()
+    if (uploadPickUrl) {
+      URL.revokeObjectURL(uploadPickUrl)
+    }
+    setShowUploadModal(false)
+    setUploadPickUrl(null)
+    setUploadTitle('')
+    setUploadDescription('')
+    setUploadProgress(0)
+    setUploadInFlight(false)
+    setUploadFileMeta(null)
+    setUploadDragActive(false)
+    if (uploadFileInputRef.current) uploadFileInputRef.current.value = ''
+  }, [uploadPickUrl])
+
+  const openUploadModal = () => {
+    clearUploadProgressTimer()
+    if (uploadPickUrl) {
+      URL.revokeObjectURL(uploadPickUrl)
+    }
+    setUploadPickUrl(null)
+    setUploadTitle('')
+    setUploadDescription('')
+    setUploadProgress(0)
+    setUploadInFlight(false)
+    setUploadFileMeta(null)
+    setUploadDragActive(false)
+    setShowUploadModal(true)
+    if (uploadFileInputRef.current) uploadFileInputRef.current.value = ''
+  }
+
+  const applyUploadFile = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      showToast('Use an image file (JPEG, PNG, GIF, or WebP).')
+      return
+    }
+    const maxBytes = 25 * 1024 * 1024
+    if (file.size > maxBytes) {
+      showToast('For this demo, keep images under 25 MB.')
+      return
+    }
+    if (uploadPickUrl) {
+      URL.revokeObjectURL(uploadPickUrl)
+    }
+    const url = URL.createObjectURL(file)
+    setUploadPickUrl(url)
+    setUploadFileMeta({ name: file.name, size: file.size })
+    const base = file.name.replace(/\.[^.]+$/, '').trim()
+    setUploadTitle(base || 'Untitled photo')
+    setUploadDescription('')
+  }
+
+  const onUploadFileChosen = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    applyUploadFile(file)
+    event.target.value = ''
+  }
+
+  const onUploadDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setUploadDragActive(false)
+    const file = event.dataTransfer.files?.[0]
+    if (file) applyUploadFile(file)
+  }
+
+  const onUploadDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+    setUploadDragActive(true)
+  }
+
+  const onUploadDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    const next = event.relatedTarget as Node | null
+    if (next && event.currentTarget.contains(next)) return
+    setUploadDragActive(false)
+  }
+
+  const commitUploadedPhoto = (imageUrl: string, titleRaw: string, descriptionRaw: string) => {
+    clearUploadProgressTimer()
+    nextUploadPhotoIdRef.current += 1
+    const photoId = `u-${nextUploadPhotoIdRef.current}`
+    const title = titleRaw.trim() || 'Untitled photo'
+    const description =
+      descriptionRaw.trim() || 'Added from your device (demo upload to the shared library).'
+    const albumName =
+      screen === 'album-detail' && activeAlbum ? activeAlbum.name : null
+
+    const newPhoto: Photo = {
+      id: photoId,
+      title,
+      event: 'Misc',
+      date: new Date().toISOString(),
+      owner: DEMO_USER_DISPLAY_NAME,
+      album: albumName,
+      tags: ['Misc', 'Office'],
+      url: imageUrl,
+      description,
+    }
+
+    setPhotos((prev) => [newPhoto, ...prev])
+    if (screen === 'album-detail' && activeAlbumId) {
+      setAlbums((prev) =>
+        prev.map((a) =>
+          a.id === activeAlbumId ? { ...a, photoIds: [...a.photoIds, photoId] } : a,
+        ),
+      )
+    }
+
+    const where =
+      albumName != null
+        ? ` — also placed in “${albumName}”`
+        : ` — in ${DEMO_ORG_NAME}'s shared library`
+    showToast(`Uploaded as ${DEMO_USER_DISPLAY_NAME}${where}.`)
+    setShowUploadModal(false)
+    setUploadPickUrl(null)
+    setUploadTitle('')
+    setUploadDescription('')
+    setUploadProgress(0)
+    setUploadInFlight(false)
+    setUploadFileMeta(null)
+    setUploadDragActive(false)
+    if (uploadFileInputRef.current) uploadFileInputRef.current.value = ''
+  }
+
+  const startDemoUpload = () => {
+    if (!uploadPickUrl) {
+      showToast('Choose a photo from your device first.')
+      return
+    }
+    if (uploadInFlight) return
+    const snapshotUrl = uploadPickUrl
+    const snapshotTitle = uploadTitle.trim() || 'Untitled photo'
+    const snapshotDesc =
+      uploadDescription.trim() || 'Added from your device (demo upload to the shared library).'
+    setUploadInFlight(true)
+    setUploadProgress(0)
+    clearUploadProgressTimer()
+    let p = 0
+    uploadProgressTimerRef.current = setInterval(() => {
+      p += 9 + Math.floor(Math.random() * 5)
+      if (p >= 100) {
+        setUploadProgress(100)
+        commitUploadedPhoto(snapshotUrl, snapshotTitle, snapshotDesc)
+      } else {
+        setUploadProgress(p)
+      }
+    }, 90)
+  }
+
   const triggerFakeUploadFromDevice = () => {
-    showToast('Upload from device (mock—no file picker).')
+    openUploadModal()
   }
 
   const applyAlbumDetailFilters = () => {
@@ -761,19 +1324,81 @@ function App() {
 
   return (
     <div className="app">
+      <header className="app-top-nav" role="banner">
+        <div className="app-top-nav-brand">
+          <img
+            className="app-top-nav-logo"
+            src={`${import.meta.env.BASE_URL}PhotoTag.png`}
+            alt=""
+            width={32}
+            height={32}
+          />
+          <div className="app-top-nav-titles">
+            <span className="app-top-nav-app-name">{APP_DISPLAY_NAME}</span>
+            <span className="app-top-nav-tagline">
+              Tag and sort your organization&apos;s photos — together in one library
+            </span>
+          </div>
+        </div>
+        <div
+          className="app-top-nav-user"
+          title="Demo preview — no account or sign-in"
+        >
+          <img
+            className="app-top-nav-avatar"
+            src={avatarPhotoUrl}
+            alt=""
+            width={34}
+            height={34}
+          />
+          <span className="app-top-nav-user-meta">
+            <span className="app-top-nav-user-label">Signed in as</span>
+            <span className="app-top-nav-user-name">{DEMO_USER_DISPLAY_NAME}</span>
+            <span className="app-top-nav-org">{DEMO_ORG_NAME}</span>
+          </span>
+        </div>
+      </header>
+
       <header className="page-header page-header-bar">
         <div className="page-header-text">
-          <p className="app-brand">PhotoSort</p>
-          <h1>
-            {screen === 'photos' && 'My Photos'}
-            {screen === 'albums' && 'My Albums'}
-            {screen === 'album-detail' && activeAlbum && activeAlbum.name}
-          </h1>
+          <div className="page-header-title-row page-header-title-row--org-context">
+            <span className="page-header-org-mark" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M4 21V10.5L12 4l8 6.5V21h-5v-6H9v6H4z"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                />
+                <path d="M9 9h2v2H9V9zm4 0h2v2h-2V9z" fill="currentColor" />
+              </svg>
+            </span>
+            <div className="page-header-title-main">
+              <h1>
+                {screen === 'photos' && `${DEMO_ORG_NAME}'s Photos`}
+                {screen === 'albums' && `${DEMO_ORG_NAME}'s Albums`}
+                {screen === 'album-detail' && activeAlbum && activeAlbum.name}
+              </h1>
+              <p className="page-header-viewing-as">
+                <img
+                  className="page-header-viewing-as-avatar"
+                  src={avatarPhotoUrl}
+                  alt=""
+                  width={18}
+                  height={18}
+                />
+                <span>
+                  Viewing as {DEMO_USER_DISPLAY_NAME}
+                </span>
+              </p>
+            </div>
+          </div>
           <div className="header-description">
             <p>
             {screen === 'photos' &&
-              'Browse and filter your photos. Use tags to organize the feed into sections — each tag becomes its own group.'}
-            {screen === 'albums' && 'Your albums, organized by tags. Click an album to view or add photos.'}
+              `Browse and filter ${DEMO_ORG_NAME}'s shared library. Anyone on the team can add photos and tags so events stay easy to find and organize.`}
+            {screen === 'albums' &&
+              `Albums for ${DEMO_ORG_NAME}, organized by tags. Open an album to view photos or add more from the library.`}
             {screen === 'album-detail' && activeAlbum && (
               <>
                 <span className="album-meta-badge">{activeAlbum.isPublic ? 'Public' : 'Private'}</span>
@@ -795,7 +1420,7 @@ function App() {
             onClick={goToPhotos}
             aria-current={screen === 'photos' ? 'page' : undefined}
           >
-            My Photos
+            {`${DEMO_ORG_NAME}'s Photos`}
           </button>
           <button
             type="button"
@@ -803,7 +1428,7 @@ function App() {
             onClick={goToAlbumsList}
             aria-current={screen === 'albums' || screen === 'album-detail' ? 'page' : undefined}
           >
-            My Albums
+            {`${DEMO_ORG_NAME}'s Albums`}
           </button>
         </nav>
         <div className="header-actions">
@@ -823,7 +1448,7 @@ function App() {
       {screen === 'album-detail' && activeAlbum && (
         <nav className="breadcrumb" aria-label="Breadcrumb">
           <button type="button" className="breadcrumb-link" onClick={goToAlbumsList}>
-            My Albums
+            {`${DEMO_ORG_NAME}'s Albums`}
           </button>
           <span className="breadcrumb-sep" aria-hidden="true">›</span>
           <span className="breadcrumb-current" aria-current="page">{activeAlbum.name}</span>
@@ -834,8 +1459,25 @@ function App() {
       <div className="layout">
         <aside className="sidebar" aria-label="Filters and tag search">
           <div className="filter-panel">
+            <button
+              type="button"
+              className="btn-reset filter-reset-top"
+              onClick={() => {
+                setSelectedTags([])
+                setSearchQuery('')
+                setSortOrder('desc')
+                setStartDate('')
+                setEndDate('')
+                setShowActiveTagsPanel(false)
+                setShowAllTagsModal(false)
+              }}
+            >
+              Reset filters
+            </button>
+
             <div className="search-row">
               <input
+                ref={photosSearchInputRef}
                 className="search-input-full"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
@@ -935,22 +1577,6 @@ function App() {
               View all tags
               {selectedTags.length > 0 ? ` (${selectedTags.length} selected)` : ''}
             </button>
-
-            <button
-              type="button"
-              className="btn-reset"
-              onClick={() => {
-                setSelectedTags([])
-                setSearchQuery('')
-                setSortOrder('desc')
-                setStartDate('')
-                setEndDate('')
-                setShowActiveTagsPanel(false)
-                setShowAllTagsModal(false)
-              }}
-            >
-              Reset filters
-            </button>
           </div>
         </aside>
 
@@ -969,7 +1595,7 @@ function App() {
                     <img src={photo.url} alt={photo.title} loading="lazy" />
                     <div className="card-body">
                       <h3>"{photo.title}"</h3>
-                      <p className="card-owner">{photo.owner}</p>
+                      <CardOwnerFilter owner={photo.owner} onActivate={applyUploaderFilter} />
                       <p className="card-date">{new Date(photo.date).toLocaleDateString()}</p>
                     </div>
                   </button>
@@ -988,6 +1614,22 @@ function App() {
         <div className="layout">
           <aside className="sidebar" aria-label="Album list filters">
             <div className="filter-panel">
+              <button
+                type="button"
+                className="btn-reset filter-reset-top"
+                onClick={() => {
+                  setAlbumListSelectedTags([])
+                  setAlbumListSearch('')
+                  setAlbumListSort('desc')
+                  setAlbumListStart('')
+                  setAlbumListEnd('')
+                  setAlbumListShowActivePanel(false)
+                  setShowAlbumListAllTagsModal(false)
+                }}
+              >
+                Reset filters
+              </button>
+
               <div className="search-row">
                 <input
                   className="search-input-full"
@@ -1096,22 +1738,6 @@ function App() {
                 View all tags
                 {albumListSelectedTags.length > 0 ? ` (${albumListSelectedTags.length} selected)` : ''}
               </button>
-
-              <button
-                type="button"
-                className="btn-reset"
-                onClick={() => {
-                  setAlbumListSelectedTags([])
-                  setAlbumListSearch('')
-                  setAlbumListSort('desc')
-                  setAlbumListStart('')
-                  setAlbumListEnd('')
-                  setAlbumListShowActivePanel(false)
-                  setShowAlbumListAllTagsModal(false)
-                }}
-              >
-                Reset filters
-              </button>
             </div>
           </aside>
 
@@ -1170,13 +1796,30 @@ function App() {
                   + Upload New Photo
                 </button>
                 <button type="button" className="btn-secondary btn-wide" onClick={openSavedPhotosPicker}>
-                  Add from My Photos
+                  {`Add from ${DEMO_ORG_NAME}'s Photos`}
                 </button>
               </div>
             </div>
             <div className="filter-panel">
+              <button
+                type="button"
+                className="btn-reset filter-reset-top"
+                onClick={() => {
+                  setDetailPendingSearch('')
+                  setDetailPendingSort('desc')
+                  setDetailPendingStart('')
+                  setDetailPendingEnd('')
+                  setDetailPendingSectionTags([])
+                  setDetailShowActivePanel(false)
+                  setShowDetailAllTagsModal(false)
+                }}
+              >
+                Reset filters
+              </button>
+
               <div className="search-row">
                 <input
+                  ref={detailSearchInputRef}
                   className="search-input-full"
                   value={detailPendingSearch}
                   onChange={(event) => setDetailPendingSearch(event.target.value)}
@@ -1293,22 +1936,6 @@ function App() {
                   Apply filters
                 </button>
               </div>
-
-              <button
-                type="button"
-                className="btn-reset"
-                onClick={() => {
-                  setDetailPendingSearch('')
-                  setDetailPendingSort('desc')
-                  setDetailPendingStart('')
-                  setDetailPendingEnd('')
-                  setDetailPendingSectionTags([])
-                  setDetailShowActivePanel(false)
-                  setShowDetailAllTagsModal(false)
-                }}
-              >
-                Reset filters
-              </button>
             </div>
           </aside>
 
@@ -1327,10 +1954,9 @@ function App() {
                       <img src={photo.url} alt={photo.title} loading="lazy" />
                       <div className="card-body">
                         <h3>"{photo.title}"</h3>
-                        <p>
-                          {new Date(photo.date).toLocaleString()} — {photo.owner}
-                        </p>
-                        <p>{photo.tags.slice(0, 3).join(' · ')}</p>
+                        <p className="card-datetime">{new Date(photo.date).toLocaleString()}</p>
+                        <CardOwnerFilter owner={photo.owner} onActivate={applyUploaderFilter} />
+                        <p className="card-tags-line">{photo.tags.slice(0, 3).join(' · ')}</p>
                       </div>
                     </button>
                   ))}
@@ -1590,6 +2216,252 @@ function App() {
         </div>
       )}
 
+      {showUploadModal && (
+        <div
+          className="overlay overlay-narrow upload-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Upload photo"
+          onClick={closeUploadModal}
+        >
+          <article className="upload-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="upload-modal-hero">
+              <div className="upload-modal-hero-top">
+                <div className="upload-modal-hero-brand">
+                  <img
+                    className="upload-modal-hero-icon"
+                    src={`${import.meta.env.BASE_URL}PhotoTag.png`}
+                    alt=""
+                    width={36}
+                    height={36}
+                  />
+                  <div>
+                    <h3 className="upload-modal-title">Add to library</h3>
+                    <p className="upload-modal-subtitle">Photos appear under your name in the org catalog</p>
+                  </div>
+                </div>
+                <button type="button" className="lightbox-close" aria-label="Close" onClick={closeUploadModal}>
+                  ×
+                </button>
+              </div>
+
+              <ol className="upload-modal-steps" aria-label="Upload steps">
+                <li
+                  className={`upload-modal-step${
+                    uploadPickUrl || uploadInFlight ? ' upload-modal-step--complete' : ' upload-modal-step--active'
+                  }`}
+                >
+                  <span className="upload-modal-step-num">1</span>
+                  <span className="upload-modal-step-label">File</span>
+                </li>
+                <li className="upload-modal-step-connector" aria-hidden="true" />
+                <li
+                  className={`upload-modal-step${
+                    uploadInFlight ? ' upload-modal-step--complete' : ''
+                  }${uploadPickUrl && !uploadInFlight ? ' upload-modal-step--active' : ''}${
+                    !uploadPickUrl ? ' upload-modal-step--muted' : ''
+                  }`}
+                >
+                  <span className="upload-modal-step-num">2</span>
+                  <span className="upload-modal-step-label">Details</span>
+                </li>
+                <li className="upload-modal-step-connector" aria-hidden="true" />
+                <li
+                  className={`upload-modal-step${uploadInFlight ? ' upload-modal-step--active' : ''}${
+                    !uploadPickUrl ? ' upload-modal-step--muted' : ''
+                  }${uploadPickUrl && !uploadInFlight ? ' upload-modal-step--next' : ''}`}
+                >
+                  <span className="upload-modal-step-num">3</span>
+                  <span className="upload-modal-step-label">Send</span>
+                </li>
+              </ol>
+            </div>
+
+            <div className="upload-modal-uploader">
+              <img className="app-top-nav-avatar" src={avatarPhotoUrl} alt="" width={40} height={40} />
+              <div className="upload-modal-who">
+                <div className="upload-modal-who-row">
+                  <span className="upload-modal-name">{DEMO_USER_DISPLAY_NAME}</span>
+                  <span className="upload-modal-badge">Uploader</span>
+                </div>
+                <span className="upload-modal-org">{DEMO_ORG_NAME}</span>
+                <p className="upload-modal-hint">
+                  {screen === 'album-detail' && activeAlbum ? (
+                    <>
+                      Destination: <strong>{activeAlbum.name}</strong> album + org-wide search. Visibility follows
+                      album rules (demo).
+                    </>
+                  ) : (
+                    <>
+                      Shared with <strong>{DEMO_ORG_NAME}</strong> teammates. New photos default to tags{' '}
+                      <strong>Office</strong> &amp; <strong>Misc</strong> — edit anytime after upload.
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="upload-modal-facts" role="list">
+              <div className="upload-modal-fact" role="listitem">
+                <span className="upload-modal-fact-k">Attribution</span>
+                <span className="upload-modal-fact-v">{DEMO_USER_DISPLAY_NAME}</span>
+              </div>
+              <div className="upload-modal-fact" role="listitem">
+                <span className="upload-modal-fact-k">Workspace</span>
+                <span className="upload-modal-fact-v">{DEMO_ORG_NAME}</span>
+              </div>
+              <div className="upload-modal-fact" role="listitem">
+                <span className="upload-modal-fact-k">Album</span>
+                <span className="upload-modal-fact-v">
+                  {screen === 'album-detail' && activeAlbum ? activeAlbum.name : 'Library only'}
+                </span>
+              </div>
+            </div>
+
+            <input
+              ref={uploadFileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              className="upload-modal-file-input"
+              onChange={onUploadFileChosen}
+              aria-label="Choose image file"
+            />
+
+            {!uploadPickUrl ? (
+              <div
+                className={`upload-modal-dropzone${uploadDragActive ? ' upload-modal-dropzone--active' : ''}`}
+                onDrop={onUploadDrop}
+                onDragOver={onUploadDragOver}
+                onDragEnter={onUploadDragOver}
+                onDragLeave={onUploadDragLeave}
+              >
+                <div className="upload-modal-dropzone-icon" aria-hidden="true">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M12 4v12m0 0l4-4m-4 4l-4-4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <p className="upload-modal-dropzone-title">Drop an image here</p>
+                <p className="upload-modal-dropzone-text">
+                  or browse from your computer — we&apos;ll generate a preview before anything is saved.
+                </p>
+                <ul className="upload-modal-formats">
+                  <li>JPEG, PNG, GIF, WebP</li>
+                  <li>Max 25 MB (demo limit)</li>
+                  <li>Stays in this browser session only</li>
+                </ul>
+                <button
+                  type="button"
+                  className="btn-create upload-modal-browse-btn"
+                  onClick={() => uploadFileInputRef.current?.click()}
+                >
+                  Browse files…
+                </button>
+              </div>
+            ) : (
+              <div className="upload-modal-editor">
+                <div className="upload-modal-file-strip">
+                  <div className="upload-modal-file-meta">
+                    <span className="upload-modal-file-name" title={uploadFileMeta?.name}>
+                      {uploadFileMeta?.name ?? 'Image'}
+                    </span>
+                    {uploadFileMeta && (
+                      <span className="upload-modal-file-size">{formatFileSize(uploadFileMeta.size)}</span>
+                    )}
+                  </div>
+                  {!uploadInFlight && (
+                    <button
+                      type="button"
+                      className="btn-secondary upload-modal-replace-btn"
+                      onClick={() => uploadFileInputRef.current?.click()}
+                    >
+                      Replace
+                    </button>
+                  )}
+                </div>
+                <div className="upload-modal-preview">
+                  <img src={uploadPickUrl} alt="" />
+                </div>
+                <div className="upload-modal-fields">
+                  <label className="form-field">
+                    Title
+                    <input
+                      value={uploadTitle}
+                      onChange={(event) => setUploadTitle(event.target.value)}
+                      placeholder="Give this photo a clear title"
+                      disabled={uploadInFlight}
+                    />
+                  </label>
+                  <label className="form-field">
+                    Description <span className="upload-modal-optional">optional</span>
+                    <textarea
+                      value={uploadDescription}
+                      onChange={(event) => setUploadDescription(event.target.value)}
+                      placeholder="Context for teammates — event, location, who should see it…"
+                      rows={3}
+                      disabled={uploadInFlight}
+                    />
+                  </label>
+                </div>
+                {uploadInFlight && (
+                  <div className="upload-modal-progress" aria-live="polite">
+                    <div className="upload-modal-progress-head">
+                      <span className="upload-modal-progress-label">Sending to {DEMO_ORG_NAME}…</span>
+                      <span className="upload-modal-progress-pct">{uploadProgress}%</span>
+                    </div>
+                    <div
+                      className="upload-modal-progress-bar"
+                      role="progressbar"
+                      aria-valuenow={uploadProgress}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                    >
+                      <div className="upload-modal-progress-fill" style={{ width: `${uploadProgress}%` }} />
+                    </div>
+                    <p className="upload-modal-progress-hint">Encrypting preview · scanning metadata (simulated)</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <p className="upload-modal-demo-strip">
+              <strong>Demo mode:</strong> no server upload — the image never leaves your tab. Perfect for screenshots
+              in class.
+            </p>
+
+            <div className="add-tag-footer upload-modal-footer">
+              <div className="upload-modal-footer-left">
+                <button type="button" className="btn-secondary" onClick={closeUploadModal} disabled={uploadInFlight}>
+                  Cancel
+                </button>
+              </div>
+              <div className="upload-modal-footer-right">
+                <button
+                  type="button"
+                  className="btn-create upload-modal-primary-btn"
+                  onClick={startDemoUpload}
+                  disabled={!uploadPickUrl || uploadInFlight}
+                >
+                  {uploadInFlight ? (
+                    <>
+                      <span className="upload-modal-btn-spinner" aria-hidden="true" />
+                      Uploading…
+                    </>
+                  ) : (
+                    <>Upload to {DEMO_ORG_NAME}</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      )}
+
       {showCreateAlbumModal && (
         <div
           className="overlay overlay-narrow"
@@ -1809,8 +2681,25 @@ function App() {
             <div className="layout">
               <aside className="sidebar" aria-label="Saved photo filters">
                 <div className="filter-panel">
+                  <button
+                    type="button"
+                    className="btn-reset filter-reset-top"
+                    onClick={() => {
+                      setSelectedTags([])
+                      setSearchQuery('')
+                      setSortOrder('desc')
+                      setStartDate('')
+                      setEndDate('')
+                      setShowActiveTagsPanel(false)
+                      setShowAllTagsModal(false)
+                    }}
+                  >
+                    Reset filters
+                  </button>
+
                   <div className="search-row">
                     <input
+                      ref={savedPickerSearchInputRef}
                       className="search-input-full"
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
@@ -1924,22 +2813,6 @@ function App() {
                     View all tags
                     {selectedTags.length > 0 ? ` (${selectedTags.length} selected)` : ''}
                   </button>
-
-                  <button
-                    type="button"
-                    className="btn-reset"
-                    onClick={() => {
-                      setSelectedTags([])
-                      setSearchQuery('')
-                      setSortOrder('desc')
-                      setStartDate('')
-                      setEndDate('')
-                      setShowActiveTagsPanel(false)
-                      setShowAllTagsModal(false)
-                    }}
-                  >
-                    Reset filters
-                  </button>
                 </div>
               </aside>
 
@@ -1958,7 +2831,8 @@ function App() {
                           <img src={photo.url} alt={photo.title} loading="lazy" />
                           <div className="card-body">
                             <h3>"{photo.title}"</h3>
-                            <p>{photo.tags.slice(0, 3).join(' · ')}</p>
+                            <CardOwnerFilter owner={photo.owner} onActivate={applyUploaderFilter} />
+                            <p className="card-tags-line">{photo.tags.slice(0, 3).join(' · ')}</p>
                           </div>
                         </button>
                       ))}
