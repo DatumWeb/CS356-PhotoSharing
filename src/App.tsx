@@ -1,10 +1,12 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ChangeEvent,
+  type CSSProperties,
   type DragEvent,
 } from 'react'
 import avatarPhotoUrl from './assets/scottlarsen.jpeg'
@@ -646,6 +648,11 @@ function App() {
   const [allTagsModalDraft, setAllTagsModalDraft] = useState<string[]>([])
   const [allTagsModalSearch, setAllTagsModalSearch] = useState('')
   const toastIdRef = useRef(0)
+  const pageHeaderRef = useRef<HTMLElement>(null)
+  const appTopNavRef = useRef<HTMLElement>(null)
+  const [stickyContextBarVisible, setStickyContextBarVisible] = useState(false)
+  const [appTopNavHeightPx, setAppTopNavHeightPx] = useState(0)
+  const [appTopNavInView, setAppTopNavInView] = useState(true)
 
   const [showCreateAlbumModal, setShowCreateAlbumModal] = useState(false)
   const [createAlbumName, setCreateAlbumName] = useState('')
@@ -766,6 +773,13 @@ function App() {
     [albums, activeAlbumId],
   )
 
+  const stickyContextTitle = useMemo(() => {
+    if (screen === 'photos') return `${DEMO_ORG_NAME}'s Photos`
+    if (screen === 'albums') return `${DEMO_ORG_NAME}'s Albums`
+    if (screen === 'album-detail' && activeAlbum) return activeAlbum.name
+    return ''
+  }, [screen, activeAlbum])
+
   const lightboxPool = useMemo(() => {
     if (screen === 'album-detail' && activeAlbum) {
       return photos.filter((p) => activeAlbum.photoIds.includes(p.id))
@@ -794,6 +808,43 @@ function App() {
         uploadProgressTimerRef.current = null
       }
     }
+  }, [])
+
+  useEffect(() => {
+    const el = pageHeaderRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setStickyContextBarVisible(!entry.isIntersecting)
+      },
+      { root: null, rootMargin: '0px', threshold: 0 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [screen, activeAlbumId])
+
+  useLayoutEffect(() => {
+    const nav = appTopNavRef.current
+    if (!nav) return
+    const ro = new ResizeObserver(() => {
+      setAppTopNavHeightPx(Math.round(nav.getBoundingClientRect().height))
+    })
+    ro.observe(nav)
+    setAppTopNavHeightPx(Math.round(nav.getBoundingClientRect().height))
+    return () => ro.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const nav = appTopNavRef.current
+    if (!nav) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setAppTopNavInView(entry.isIntersecting)
+      },
+      { root: null, rootMargin: '0px', threshold: 0 },
+    )
+    observer.observe(nav)
+    return () => observer.disconnect()
   }, [])
 
   const filteredAlbumsList = useMemo(() => {
@@ -1501,9 +1552,21 @@ function App() {
     setShowDetailAllTagsModal(false)
   }
 
+  const showStickyContextBar = stickyContextBarVisible && stickyContextTitle.length > 0
+  const stickyBarTopPx = appTopNavInView ? appTopNavHeightPx : 0
+
   return (
-    <div className="app">
-      <header className="app-top-nav" role="banner">
+    <div
+      className={`app${showStickyContextBar ? ' app--sticky-context' : ''}`}
+      style={
+        showStickyContextBar
+          ? ({
+              ['--sticky-bar-top' as string]: `${stickyBarTopPx}px`,
+            } as CSSProperties)
+          : undefined
+      }
+    >
+      <header ref={appTopNavRef} className="app-top-nav" role="banner">
         <div className="app-top-nav-brand">
           <img
             className="app-top-nav-logo"
@@ -1538,7 +1601,40 @@ function App() {
         </div>
       </header>
 
-      <header className="page-header page-header-bar">
+      {showStickyContextBar && (
+        <div
+          className="page-context-sticky"
+          role="region"
+          aria-label="Current page"
+          style={{ top: stickyBarTopPx }}
+        >
+          <div className="page-context-sticky-lead">
+            <span className="page-context-sticky-title">{stickyContextTitle}</span>
+            <span className="page-context-sticky-powered">
+              Powered by {APP_DISPLAY_NAME}
+            </span>
+          </div>
+          <div
+            className="app-top-nav-user page-context-sticky-user"
+            title="Demo preview — no account or sign-in"
+          >
+            <img
+              className="app-top-nav-avatar"
+              src={avatarPhotoUrl}
+              alt=""
+              width={34}
+              height={34}
+            />
+            <span className="app-top-nav-user-meta">
+              <span className="app-top-nav-user-label">Signed in as</span>
+              <span className="app-top-nav-user-name">{DEMO_USER_DISPLAY_NAME}</span>
+              <span className="app-top-nav-org">{DEMO_ORG_NAME}</span>
+            </span>
+          </div>
+        </div>
+      )}
+
+      <header ref={pageHeaderRef} className="page-header page-header-bar">
         <div className="page-header-text">
           <div className="page-header-title-row page-header-title-row--org-context">
             <span className="page-header-org-mark" aria-hidden="true">

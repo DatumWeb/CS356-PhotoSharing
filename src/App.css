@@ -9,6 +9,72 @@
   gap: 1.25rem;
 }
 
+.app--sticky-context {
+  --sticky-context-offset: 4rem;
+  --sticky-context-filter-gap: 1.75rem;
+}
+
+.page-context-sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  min-height: var(--sticky-context-offset);
+  box-sizing: border-box;
+  padding: 0.6rem max(2rem, env(safe-area-inset-right)) 0.55rem max(2rem, env(safe-area-inset-left));
+  background: var(--canvas-raised);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.page-context-sticky-lead {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  justify-content: center;
+}
+
+.page-context-sticky-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.page-context-sticky-powered {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.page-context-sticky-user {
+  flex-shrink: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+@media (max-width: 640px) {
+  .page-context-sticky {
+    padding-inline: max(1rem, env(safe-area-inset-left));
+  }
+}
+
 /* ── Top navigation bar ── */
 
 .app-top-nav {
@@ -434,11 +500,28 @@ button:disabled {
   scrollbar-color: var(--border-strong) transparent;
 }
 
+.app--sticky-context .sidebar {
+  top: calc(
+    var(--sticky-bar-top, 0px) + var(--sticky-context-offset, 0px) + var(--sticky-context-filter-gap, 1.75rem)
+  );
+  max-height: calc(
+    100vh - var(--sticky-bar-top, 0px) - var(--sticky-context-offset, 0px) - var(
+        --sticky-context-filter-gap,
+        1.75rem
+      ) - 1rem
+  );
+}
+
 @media (max-width: 900px) {
   .sidebar {
     position: static;
     max-height: none;
     overflow-y: visible;
+  }
+
+  .app--sticky-context .sidebar {
+    top: auto;
+    max-height: none;
   }
 }
 
